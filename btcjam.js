@@ -235,7 +235,7 @@ function navigate_notes_page(casper) {
 		console.log(this.getTitle() + '\n');
 	});
 
-	casper.wait(2000);
+	casper.waitForText('Note Marketplace');
 
 	casper.then(function(){
 		this.evaluate(function(){
@@ -244,10 +244,12 @@ function navigate_notes_page(casper) {
 		});
 	})
 
-
 	var invested_sort = 'th[aria-label*=Invested]';
-	casper.waitForSelector(invested_sort).thenClick(invested_sort);
-	casper.wait(5000).thenClick(invested_sort).wait(5000);
+	casper.waitForSelector(invested_sort)
+		.thenClick(invested_sort)
+		.waitForResource(/allnotes.json.*iSortCol_0=2&sSortDir_0=asc/)
+		.thenClick(invested_sort)
+		.waitForResource(/allnotes.json.*iSortCol_0=2&sSortDir_0=desc/);
 
 	if (casper.config.debug) {
 		casper.then(function screen(){
