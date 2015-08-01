@@ -17,7 +17,7 @@ function add_notes(casper){
 	return page_notes;
 }
 
-function pushbullet_notify(page_notes, casper){
+function notify_notes(page_notes, casper){
 
 	var body = '';
 	for (var i in page_notes) {
@@ -31,12 +31,10 @@ function pushbullet_notify(page_notes, casper){
 		body = body + '\n\n';
 	}
 
-	if (page_notes.length) {
-		pushbullet({
-			body  : body,
-			title : page_notes.length + ' new notes found '
-		}, casper);
-	}
+	pushbullet({
+		body  : body,
+		title : page_notes.length + ' new notes found '
+	}, casper);
 };
 
 casper.then(function(){
@@ -58,12 +56,12 @@ casper.then(function(){
 
 casper.then(function(){
 
-	if (all_notes.length) {
-		this.renderJSON(all_notes);
-		pushbullet_notify(all_notes, this);
-	} else {
+	if (!all_notes.length) {
 		casper.log('NO NOTES FOUND! adjust config', 'warning');
 	}
+
+	this.renderJSON(all_notes);
+	notify_notes(all_notes, this);
 });
 
 
@@ -183,17 +181,6 @@ function init_casper() {
 		}
 	});
 
-	// print out all the messages in the headless browser context
-	casper.on('remote.message', function(msg) {
-		this.echo('remote message caught: ' + msg);
-	});
-
-	// print out all the messages in the headless browser context
-	casper.on("page.error", function(msg, trace) {
-		this.echo("Page Error: " + msg, "ERROR");
-	});
-
-
 	casper.renderJSON = function(what) {
 		return this.log(JSON.stringify(what, null, '  '), 'warning');
 	};
@@ -201,6 +188,22 @@ function init_casper() {
 	var fs = require('fs');
 	var config_file = fs.read('btcjam.json');
 	casper.config = JSON.parse(config_file) || {};
+
+	casper.on('remote.message', function(msg) {
+		this.log('remote message caught: ' + msg, 'info');
+	});
+
+	casper.on("page.error", function(msg, trace) {
+		this.captureSelector('error.png', 'html');
+		this.log("Page Error: " + msg, "warning");
+		// pushbullet ({'body' : '[aws][btcjam] page error'}, this);
+	});
+
+	casper.on("error", function(msg, trace) {
+		this.captureSelector('error.png', 'html');
+		this.log(msg, "error");
+		// pushbullet ({'body' : '[aws][btcjam] page error'}, this);
+	});
 
 	return casper;
 }
@@ -257,7 +260,19 @@ function navigate_notes_page(casper) {
 function pushbullet(options, casper) {
 
 	var TARGET_EMAIL = casper.config.pushbullet.email;
+
+	if (!TARGET_EMAIL) {
+		casper.log("casper.config.pushbullet.email missing", "error");
+		return 0;
+	}
+
 	var API_KEY = casper.config.pushbullet.api_key;
+
+	if (!API_KEY) {
+		casper.log("casper.config.pushbullet.api_key missing", "error");
+		return 0;
+	}
+
 	options["email"] = TARGET_EMAIL;
 	options["type"]  = options.type || "note";
 	options["url"]   = options.url || "";
@@ -273,9 +288,7 @@ function pushbullet(options, casper) {
 			"Authorization": "Bearer " + API_KEY
 		}
 	}, function(response){
-		if(response.status == 200){
-			require('utils').dump(this.page.content);
-		}
+		require('utils').dump(this.page.content);
 	});
 
 }
