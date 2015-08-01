@@ -39,22 +39,26 @@ function pushbullet_notify(page_notes, casper){
 	}
 };
 
-casper.then(function(){
-	all_notes = all_notes.concat(add_notes(this));
-});
-casper.then(function(){
-	this.evaluate(function(){
-		$('.paginate_button.active').next().trigger('click');
+casper.repeat(4, function(){
+	var that_notes = all_notes;
+
+	casper.then(function(){
+		that_notes = that_notes.concat(add_notes(this));
+		this.renderJSON(that_notes);
 	});
-}).wait(6000);
 
-// casper.then(function screen(){
-// 	this.captureSelector('notes2.png', 'html');
-// });
+	casper.then(function(){
+		this.evaluate(function(){
+			$('.paginate_button.active').next().trigger('click');
+		});
+	}).wait(6000);
+
+	// casper.then(function screen(){
+	// 	this.captureSelector('notes2.png', 'html');
+	// });
+});
 
 casper.then(function(){
-	all_notes = all_notes.concat(add_notes(this));
-	this.renderJSON(all_notes);
 	pushbullet_notify(all_notes, this);
 });
 
