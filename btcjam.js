@@ -41,14 +41,10 @@ function pushbullet_notify(page_notes, casper){
 
 casper.then(function(){
 
-	var inner_notes = all_notes;
-
 	casper.repeat(4, function(){
-		var that_notes = inner_notes;
-		this.renderJSON(that_notes);
 
 		casper.then(function(){
-			that_notes = that_notes.concat(add_notes(this));
+			all_notes = all_notes.concat(add_notes(this));
 		});
 
 		casper.then(function(){
@@ -57,12 +53,17 @@ casper.then(function(){
 			});
 		}).wait(6000);
 	});
-	this.renderJSON(inner_notes);
+
 });
 
 casper.then(function(){
-	this.renderJSON(all_notes);
-	pushbullet_notify(all_notes, this);
+
+	if (all_notes.length) {
+		this.renderJSON(all_notes);
+		pushbullet_notify(all_notes, this);
+	} else {
+		casper.log('NO NOTES FOUND! adjust config', 'warning');
+	}
 });
 
 
@@ -194,7 +195,7 @@ function init_casper() {
 
 
 	casper.renderJSON = function(what) {
-		return this.echo(JSON.stringify(what, null, '  '));
+		return this.log(JSON.stringify(what, null, '  '), 'warning');
 	};
 
 	var fs = require('fs');
