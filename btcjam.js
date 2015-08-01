@@ -207,19 +207,22 @@ function init_casper() {
 function login(casper) {
 	casper.start(casper.config.url, function login_facebook() {
 
-		// this.captureSelector('before_login.png', 'html');
+		if (casper.config.debug) {
+			this.captureSelector('before_login.png', 'html');
+		}
 
 		casper.waitForSelector('#user_email', function fill_login_form() {
 			this.fill('form#new_user', { 'user[email]': casper.config.user, 'user[password]': casper.config.password }, true);
-			// this.captureSelector('login.png', 'html');
 		});
 	}, function error_popup(){
 		this.captureSelector('error_login.png', 'html');
 	}, 15000);
 
-	// casper.then(function after_submit(){
-	// 	this.captureSelector('logged_on.png', 'html');
-	// });
+	if (casper.config.debug) {
+		casper.then(function after_submit(){
+			this.captureSelector('logged_on.png', 'html');
+		});
+	}
 }
 
 function navigate_notes_page(casper) {
@@ -242,10 +245,11 @@ function navigate_notes_page(casper) {
 	casper.waitForSelector(invested_sort).thenClick(invested_sort);
 	casper.wait(5000).thenClick(invested_sort).wait(5000);
 
-
-	// casper.then(function screen(){
-	// 	this.captureSelector('notes.png', 'html');
-	// });
+	if (casper.config.debug) {
+		casper.then(function screen(){
+			this.captureSelector('notes.png', 'html');
+		});
+	}
 
 }
 
