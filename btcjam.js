@@ -28,7 +28,7 @@ function pushbullet_notify(page_notes, casper){
 		+ '\npayments\t' + note.payments
 		+ '\ndays\t\t' + note.days
 		+ '\n' + note.url;
-		body = body + '\n';
+		body = body + '\n\n';
 	}
 
 	if (page_notes.length) {
@@ -39,28 +39,32 @@ function pushbullet_notify(page_notes, casper){
 	}
 };
 
-casper.repeat(4, function(){
-	var that_notes = all_notes;
+casper.then(function(){
 
-	casper.then(function(){
-		that_notes = that_notes.concat(add_notes(this));
+	var inner_notes = all_notes;
+
+	casper.repeat(4, function(){
+		var that_notes = inner_notes;
 		this.renderJSON(that_notes);
-	});
 
-	casper.then(function(){
-		this.evaluate(function(){
-			$('.paginate_button.active').next().trigger('click');
+		casper.then(function(){
+			that_notes = that_notes.concat(add_notes(this));
 		});
-	}).wait(6000);
 
-	// casper.then(function screen(){
-	// 	this.captureSelector('notes2.png', 'html');
-	// });
+		casper.then(function(){
+			this.evaluate(function(){
+				$('.paginate_button.active').next().trigger('click');
+			});
+		}).wait(6000);
+	});
+	this.renderJSON(inner_notes);
 });
 
 casper.then(function(){
+	this.renderJSON(all_notes);
 	pushbullet_notify(all_notes, this);
 });
+
 
 casper.run();
 casper.viewport(1980, 1080);
@@ -92,7 +96,7 @@ function parse_notes(raw_page_notes, casper) {
 		}
 
 		var rating = listing_rating(note[0]);
-		if (rating == "E") {
+		if (rating === casper.config.skip.rating) {
 			continue;
 		}
 
