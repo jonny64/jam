@@ -20,6 +20,7 @@ casper.then(function(){
 			this.evaluate(function(){
 				$('.paginate_button.active').next().trigger('click');
 			});
+			casper.log('navigate next page', 'debug');
 		}).wait(6000);
 
 		if (casper.config.debug) {
@@ -287,7 +288,7 @@ function navigate_notes_page(casper) {
 		.thenClick(invested_sort)
 		.wait(250)
 		.waitForResource(/allnotes.json.*iSortCol_0=2&sSortDir_0=desc/)
-		.wait(250);
+		.wait(500);
 
 	if (casper.config.debug) {
 		casper.then(function screen(){
