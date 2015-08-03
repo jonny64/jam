@@ -1,0 +1,16 @@
+{
+	"debug" : 0,
+	"skip" : {
+		"yield" : 150,
+		"hours" : 120,
+		"funding" : 1,
+		"rating" : "E"
+	},
+	"url": "https://btcjam.com/users/sign_in?landing_page=mixed",
+	"user" : "@gmail.com",
+	"password" : "",
+	"pushbullet" : {
+		"email": "@gmail.com",
+		"api_key" : ""
+	}
+}
