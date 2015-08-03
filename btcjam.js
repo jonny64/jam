@@ -6,37 +6,6 @@ navigate_notes_page (casper);
 
 var all_notes = [];
 
-function add_notes(casper){
-	var raw_page_notes = casper.evaluate(function(){
-		var notes = $('#allnotes').dataTable();
-		return notes.fnGetData();
-	});
-
-	var page_notes = parse_notes (raw_page_notes, casper);
-
-	return page_notes;
-}
-
-function notify_notes(page_notes, casper){
-
-	var body = '';
-	for (var i in page_notes) {
-		var note = page_notes [i];
-		body = body + note.rating + ' ' + note.yield + ' %'
-		+ '\nprice\t\t' + note.price
-		+ '\nremaining\t' + note.remaining
-		+ '\npayments\t' + note.payments
-		+ '\ndays\t\t' + note.days
-		+ '\n' + note.url;
-		body = body + '\n\n';
-	}
-
-	pushbullet({
-		body  : body,
-		title : page_notes.length + ' new notes found '
-	}, casper);
-};
-
 casper.then(function(){
 
 	var page = 1;
@@ -80,6 +49,37 @@ casper.then(function(){
 
 casper.run();
 casper.viewport(1980, 1080);
+
+function add_notes(casper){
+	var raw_page_notes = casper.evaluate(function(){
+		var notes = $('#allnotes').dataTable();
+		return notes.fnGetData();
+	});
+
+	var page_notes = parse_notes (raw_page_notes, casper);
+
+	return page_notes;
+}
+
+function notify_notes(page_notes, casper){
+
+	var body = '';
+	for (var i in page_notes) {
+		var note = page_notes [i];
+		body = body + note.rating + ' ' + note.yield + ' %'
+		+ '\nprice\t\t' + note.price
+		+ '\nremaining\t' + note.remaining
+		+ '\npayments\t' + note.payments
+		+ '\ndays\t\t' + note.days
+		+ '\n' + note.url;
+		body = body + '\n\n';
+	}
+
+	pushbullet({
+		body  : body,
+		title : page_notes.length + ' new notes found '
+	}, casper);
+};
 
 function parse_notes(raw_page_notes, casper) {
 
