@@ -58,6 +58,10 @@ function add_notes(casper){
 
 	var page_notes = parse_notes (raw_page_notes, casper);
 
+	page_notes = extend_info_notes(page_notes);
+
+	page_notes = sort_notes(page_notes);
+
 	return page_notes;
 }
 
@@ -94,7 +98,7 @@ function parse_notes(raw_page_notes, casper) {
 			continue;
 		}
 
-		var yield = parseFloat(note [6].replace(/\%\s*/, ''));
+		var yield = parseFloat(note [6].replace(/\>\s*/, '').replace(/\s*\%\s*/, ''));
 		if (!yield) {
 			yield = note [6];
 		}
@@ -117,11 +121,15 @@ function parse_notes(raw_page_notes, casper) {
 			continue;
 		}
 
-		var url = listing_link(note [1]);
+		var id_listing = listing_id(note [1]);
+		if (!id_listing) {
+			continue;
+		}
 
 		page_notes.push({
 			rating    : rating,
-			url       : url,
+			url       : listing_link(id_listing),
+			id_listing : id_listing,
 			payments  : payments,
 			days      : hours_left / 24,
 			remaining : parseFloat(note [4].replace(/^\D/, '')),
@@ -130,9 +138,15 @@ function parse_notes(raw_page_notes, casper) {
 		});
 	}
 
-	page_notes = page_notes.sort(function(a, b){return b.price - a.price});
-
 	return page_notes;
+}
+
+function extend_info_notes(notes) {
+	return notes;
+}
+
+function sort_notes(notes) {
+	return notes.sort(function(a, b){return b.price - a.price});
 }
 
 function note_hours_left(html){
@@ -175,13 +189,17 @@ function listing_payment_cnt(html) {
 	return 0;
 }
 
-function listing_link(html) {
+function listing_id(html) {
 	var info_regex = /\d+/g;
 	var m = info_regex.exec(html);
 	if (m && m.length) {
-		return 'http://btcjamtop.com/Listings/Inspect/' + m [0];
+		return parseInt(m[0]);
 	}
-	return '';
+	return -1;
+}
+
+function listing_link(id_listing) {
+	return 'http://btcjamtop.com/Listings/Inspect/' + id_listing;
 }
 
 function init_casper() {
