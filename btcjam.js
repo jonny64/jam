@@ -278,9 +278,13 @@ function navigate_notes_page(casper) {
 	var invested_sort = 'th[aria-label*=Invested]';
 	casper.waitForSelector(invested_sort)
 		.thenClick(invested_sort)
+		.wait(250)
 		.waitForResource(/allnotes.json.*iSortCol_0=2&sSortDir_0=asc/)
+		.wait(250)
 		.thenClick(invested_sort)
-		.waitForResource(/allnotes.json.*iSortCol_0=2&sSortDir_0=desc/);
+		.wait(250)
+		.waitForResource(/allnotes.json.*iSortCol_0=2&sSortDir_0=desc/)
+		.wait(250);
 
 	if (casper.config.debug) {
 		casper.then(function screen(){
