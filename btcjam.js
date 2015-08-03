@@ -39,6 +39,8 @@ function notify_notes(page_notes, casper){
 
 casper.then(function(){
 
+	var page = 1;
+
 	casper.repeat(4, function(){
 
 		casper.then(function(){
@@ -50,6 +52,13 @@ casper.then(function(){
 				$('.paginate_button.active').next().trigger('click');
 			});
 		}).wait(6000);
+
+		if (casper.config.debug) {
+			casper.then(function screen(){
+				this.captureSelector('notes' + page + '.png', 'html');
+			});
+			page++;
+		}
 	});
 
 });
