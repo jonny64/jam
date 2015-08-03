@@ -34,6 +34,13 @@ casper.then(function(){
 
 casper.then(function(){
 
+	all_notes = extend_info_notes(all_notes);
+
+	all_notes = sort_notes(all_notes);
+});
+
+casper.then(function(){
+
 	if (!all_notes.length) {
 		casper.log('NO NOTES FOUND! adjust config', 'warning');
 
@@ -57,10 +64,6 @@ function add_notes(casper){
 	});
 
 	var page_notes = parse_notes (raw_page_notes, casper);
-
-	page_notes = extend_info_notes(page_notes);
-
-	page_notes = sort_notes(page_notes);
 
 	return page_notes;
 }
