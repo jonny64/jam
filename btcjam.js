@@ -67,6 +67,10 @@ casper.then(function(){
 
 	if (!all_notes.length) {
 		casper.log('NO NOTES FOUND! adjust config', 'warning');
+
+		if ((new Date()).getHours() > 5) {
+			return;
+		}
 	}
 
 	this.renderJSON(all_notes);
