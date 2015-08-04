@@ -250,7 +250,7 @@ function login(casper) {
 			this.captureSelector('before_login.png', 'html');
 		}
 
-		casper.waitForSelector('#user_email', function fill_login_form() {
+		casper.wait(250).waitForSelector('#user_email', function fill_login_form() {
 			this.fill('form#new_user', { 'user[email]': casper.config.user, 'user[password]': casper.config.password }, true);
 		});
 	}, function error_popup(){
@@ -266,7 +266,7 @@ function login(casper) {
 
 function navigate_notes_page(casper) {
 
-	casper.thenOpen('https://btcjam.com/notes', function() {
+	casper.wait(250).thenOpen('https://btcjam.com/notes', function() {
 		console.log(this.getTitle() + '\n');
 	});
 
@@ -302,8 +302,8 @@ function pushbullet(options, casper) {
 
 	var TARGET_EMAIL = casper.config.pushbullet.email;
 
-	if (!TARGET_EMAIL) {
-		casper.log("casper.config.pushbullet.email missing", "error");
+	if (TARGET_EMAIL) {
+		options["email"] = TARGET_EMAIL;
 		return 0;
 	}
 
@@ -314,7 +314,6 @@ function pushbullet(options, casper) {
 		return 0;
 	}
 
-	options["email"] = TARGET_EMAIL;
 	options["type"]  = options.type || "note";
 	options["url"]   = options.url || "";
 	options["title"] = options.title || "";
