@@ -102,7 +102,10 @@ function parse_notes(raw_page_notes, casper) {
 			continue;
 		}
 
+		var rating = listing_rating(note[0]);
+
 		var yield = parseFloat(note [6].replace(/\>\s*/, '').replace(/\s*\%\s*/, ''));
+
 		if (!yield) {
 			yield = note [6];
 		}
@@ -111,14 +114,11 @@ function parse_notes(raw_page_notes, casper) {
 			continue;
 		}
 
-		if (yield < (casper.config.skip.yield || 500)) {
+		var min_yield = casper.config.skip.yield;
+		if (yield < (min_yield [rating] || min_yield["other"] || 500)) {
 			continue;
 		}
 
-		var rating = listing_rating(note[0]);
-		if (rating === casper.config.skip.rating) {
-			continue;
-		}
 
 		var hours_left = note_hours_left (note [7]);
 		if (hours_left < (casper.config.skip.hours || 120)) { // only new notes 5, 6 and 7 days left
@@ -140,6 +140,10 @@ function parse_notes(raw_page_notes, casper) {
 			price     : parseFloat(note [5].replace(/^\D/, '')),
 			yield     : yield
 		});
+	}
+
+	if (casper.config.debug) {
+		require('utils').dump(page_notes);
 	}
 
 	return page_notes;
