@@ -209,7 +209,8 @@ function listing_link(id_listing) {
 function init_casper() {
 
 	var casper = require('casper').create({
-		timeout: 120000,
+		timeout: 240000,
+		waitTimeout: 60000,
 		verbose: true,
 		logLevel: 'debug',
 		pageSettings: {
