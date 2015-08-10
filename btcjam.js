@@ -10,24 +10,24 @@ casper.then(function(){
 
 	var page = 1;
 
-	casper.repeat(4, function(){
+	casper.repeat(8, function(){
 
 		casper.then(function(){
 			all_notes = all_notes.concat(add_notes(this));
 		});
 
 		casper.then(function(){
+			page++;
+			casper.log('navigate page ' + page, 'debug');
 			this.evaluate(function(){
 				$('.paginate_button.active').next().trigger('click');
 			});
-			casper.log('navigate next page', 'debug');
 		}).wait(6000);
 
 		if (casper.config.debug) {
 			casper.then(function screen(){
 				this.captureSelector('notes' + page + '.png', 'html');
 			});
-			page++;
 		}
 	});
 
