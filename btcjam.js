@@ -77,6 +77,7 @@ function notify_notes(page_notes, casper){
 		body = body + note.rating + ' ' + note.yield + ' %'
 		+ '\nprice\t\t' + note.price
 		+ '\nremaining\t' + note.remaining
+		+ '\ninvested\t' + note.invested
 		+ '\npayments\t' + note.payments
 		+ '\ndays\t\t' + note.days
 		+ '\n' + note.url;
@@ -102,7 +103,6 @@ function parse_notes(raw_page_notes, casper) {
 			continue;
 		}
 
-		var rating = listing_rating(note[0]);
 
 		var yield = parseFloat(note [6].replace(/\>\s*/, '').replace(/\s*\%\s*/, ''));
 
@@ -110,9 +110,18 @@ function parse_notes(raw_page_notes, casper) {
 			yield = note [6];
 		}
 
-		if (casper.config.skip.funding && yield == 'N/A') {
-			continue;
+		var invested = parseFloat(note [2].replace(/^\s*\D/, ''));
+		var price    = parseFloat(note [5].replace(/^\s*\D/, ''));
+
+		if (price >= invested) {
+			continue
 		}
+
+		if (yield == 'N/A') {
+			yield = 100 *  (invested / price - 1);
+		}
+
+		var rating = listing_rating(note[0]);
 
 		var min_yield = casper.config.skip.yield;
 		if (yield < (min_yield [rating] || min_yield["other"] || 500)) {
@@ -136,8 +145,9 @@ function parse_notes(raw_page_notes, casper) {
 			id_listing : id_listing,
 			payments  : payments,
 			days      : hours_left / 24,
+			invested  : invested,
 			remaining : parseFloat(note [4].replace(/^\D/, '')),
-			price     : parseFloat(note [5].replace(/^\D/, '')),
+			price     : price,
 			yield     : yield
 		});
 	}

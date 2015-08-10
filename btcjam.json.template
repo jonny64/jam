@@ -3,10 +3,11 @@
 	"skip" : {
 		"yield" : {
 			"E" : 1500,
+			"A" : 10,
+			"B" : 10,
 			"other" : 150
 		},
-		"hours" : 120,
-		"funding" : 1
+		"hours" : 120
 	},
 	"url": "https://btcjam.com/users/sign_in?landing_page=mixed",
 	"user" : "@gmail.com",
