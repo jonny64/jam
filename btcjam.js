@@ -112,8 +112,9 @@ function parse_notes(raw_page_notes, casper) {
 
 		var invested = parseFloat(note [2].replace(/^\s*\D/, ''));
 		var price    = parseFloat(note [5].replace(/^\s*\D/, ''));
+		var remaining = parseFloat(note [4].replace(/^\s*\D/, ''));
 
-		if (price >= invested) {
+		if (price >= invested || price >= remaining) {
 			continue
 		}
 
@@ -135,7 +136,7 @@ function parse_notes(raw_page_notes, casper) {
 		}
 
 		var id_listing = listing_id(note [1]);
-		if (!id_listing) {
+		if (!id_listing || casper.config.skip.listings.indexOf(id_listing) > -1) {
 			continue;
 		}
 
@@ -146,7 +147,7 @@ function parse_notes(raw_page_notes, casper) {
 			payments  : payments,
 			days      : hours_left / 24,
 			invested  : invested,
-			remaining : parseFloat(note [4].replace(/^\D/, '')),
+			remaining : remaining,
 			price     : price,
 			yield     : yield
 		});
@@ -239,6 +240,7 @@ function init_casper() {
 	var fs = require('fs');
 	var config_file = fs.read('btcjam.json');
 	casper.config = JSON.parse(config_file) || {};
+	casper.config.skip.listings = casper.config.skip.listings || [];
 
 	casper.on('remote.message', function(msg) {
 		this.log('remote message caught: ' + msg, 'info');
