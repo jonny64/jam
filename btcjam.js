@@ -10,7 +10,7 @@ casper.then(function(){
 
 	var page = 1;
 
-	casper.repeat(8, function(){
+	casper.repeat(casper.config.pages || 15, function(){
 
 		casper.then(function(){
 			all_notes = all_notes.concat(add_notes(this));
@@ -76,6 +76,7 @@ function notify_notes(page_notes, casper){
 		var note = page_notes [i];
 		body = body + note.rating + ' ' + note.yield + ' %'
 		+ '\nprice\t\t' + note.price
+		+ '\nborrower\t' + note.borrower
 		+ '\nremaining\t' + note.remaining
 		+ '\ninvested\t' + note.invested
 		+ '\npayments\t' + note.payments
@@ -140,10 +141,16 @@ function parse_notes(raw_page_notes, casper) {
 			continue;
 		}
 
+		var borrower = listing_borrower(note [0]);
+		if (!borrower || casper.config.skip.borrowers.indexOf(borrower) > -1) {
+			continue;
+		}
+
 		page_notes.push({
 			rating    : rating,
 			url       : listing_link(id_listing),
 			id_listing : id_listing,
+			borrower  : borrower,
 			payments  : payments,
 			days      : hours_left / 24,
 			invested  : invested,
@@ -217,6 +224,15 @@ function listing_id(html) {
 	return -1;
 }
 
+function listing_borrower(html) {
+	var info_regex = /media-heading.*\>\s*([\w\s]+\w)\s*\</g;
+	var m = info_regex.exec(html);
+	if (m && m.length) {
+		return m[1];
+	}
+	return -1;
+}
+
 function listing_link(id_listing) {
 	return 'http://btcjamtop.com/Listings/Inspect/' + id_listing;
 }
@@ -241,6 +257,7 @@ function init_casper() {
 	var config_file = fs.read('btcjam.json');
 	casper.config = JSON.parse(config_file) || {};
 	casper.config.skip.listings = casper.config.skip.listings || [];
+	casper.config.skip.borrowers = casper.config.skip.borrowers || [];
 
 	casper.on('remote.message', function(msg) {
 		this.log('remote message caught: ' + msg, 'info');
