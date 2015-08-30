@@ -72,11 +72,19 @@ function add_notes(casper){
 function notify_notes(page_notes, casper){
 
 	var body = '';
+	var subject_postfix = ''
 	for (var i in page_notes) {
+
 		var note = page_notes [i];
-		body = body + note.rating + ' ' + note.yield + ' %'
+
+		var grade = /A|B|C/g.exec(note.rating);
+
+		if (grade && grade.length && !subject_postfix) {
+			subject_postfix = grade [0];
+		}
+
+		body = body + note.rating + ' ' + note.yield + ' % ' + note.borrower
 		+ '\nprice\t\t' + note.price
-		+ '\nborrower\t' + note.borrower
 		+ '\nremaining\t' + note.remaining
 		+ '\ninvested\t' + note.invested
 		+ '\npayments\t' + note.payments
@@ -87,7 +95,7 @@ function notify_notes(page_notes, casper){
 
 	pushbullet({
 		body  : body,
-		title : page_notes.length + ' new notes found '
+		title : page_notes.length + ' new notes found ' + subject_postfix
 	}, casper);
 };
 
