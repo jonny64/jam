@@ -51,7 +51,6 @@ function navigate_notes_api (casper) {
 				}
 			}, function notes_page_ok(response){
 				var data = JSON.parse(this.getPageContent());
-				require('utils').dump(data.iTotalRecords);
 
 				if (casper.config.debug) {
 					casper.log('total notes count: ' + data.iTotalRecords);
@@ -63,7 +62,7 @@ function navigate_notes_api (casper) {
 
 			casper.then(function(){
 				page++;
-				casper.log('navigate page ' + page, 'debug');
+				casper.log('navigate page ' + page, 'warning');
 			}).wait(250);
 		});
 
@@ -75,7 +74,8 @@ function jam_datatables_notes_url (start, length) {
 		+ "&iDisplayStart=" + start
 		+ "&iDisplayLength=" + length
 		+ "&mDataProp_0=0&sSearch_0=&bRegex_0=false&bSearchable_0=true&bSortable_0=true&mDataProp_1=1&sSearch_1=&bRegex_1=false"
-		+ "&bSearchable_1=true&bSortable_1=true&mDataProp_2=2&sSearch_2=&bRegex_2=false&bSearchable_2=true&bSortable_2=true&mDataProp_3=3&sSearch_3=&bRegex_3=false&bSearchable_3=true&bSortable_3=false&mDataProp_4=4&sSearch_4=&bRegex_4=false&bSearchable_4=true&bSortable_4=false&mDataProp_5=5&sSearch_5=&bRegex_5=false&bSearchable_5=true&bSortable_5=true&mDataProp_6=6&sSearch_6=&bRegex_6=false&bSearchable_6=true&bSortable_6=true&mDataProp_7=7&sSearch_7=&bRegex_7=false&bSearchable_7=true&bSortable_7=false&sSearch=&bRegex=false&iSortCol_0=2&sSortDir_0=desc&iSortingCols=1"
+		+ "&bSearchable_1=true&bSortable_1=true&mDataProp_2=2&sSearch_2=&bRegex_2=false&bSearchable_2=true&bSortable_2=true&mDataProp_3=3&sSearch_3=&bRegex_3=false&bSearchable_3=true&bSortable_3=false&mDataProp_4=4&sSearch_4=&bRegex_4=false&bSearchable_4=true&bSortable_4=false&mDataProp_5=5&sSearch_5=&bRegex_5=false&bSearchable_5=true&bSortable_5=true&mDataProp_6=6&sSearch_6=&bRegex_6=false&bSearchable_6=true&bSortable_6=true&mDataProp_7=7&sSearch_7=&bRegex_7=false&bSearchable_7=true&bSortable_7=false&sSearch=&bRegex=false"
+		+ "&iSortCol_0=2&sSortDir_0=desc&iSortingCols=1"
 		+ "&_=" + Math.random();
 }
 
@@ -268,11 +268,15 @@ function listing_link(id_listing) {
 
 function init_casper() {
 
+	var fs = require('fs');
+	var config_file = fs.read('btcjam.json');
+	var config = JSON.parse(config_file) || {};
+
 	var casper = require('casper').create({
 		timeout: 240000,
 		waitTimeout: 60000,
-		verbose: true,
-		logLevel: 'debug',
+		verbose: config.debug? true : false,
+		logLevel: config.debug? 'debug' : 'warning',
 		pageSettings: {
 			userAgent: 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0',
 			sslPprotocol: "tlsv1"
@@ -283,9 +287,7 @@ function init_casper() {
 		return this.log(JSON.stringify(what, null, '  '), 'warning');
 	};
 
-	var fs = require('fs');
-	var config_file = fs.read('btcjam.json');
-	casper.config = JSON.parse(config_file) || {};
+	casper.config = config;
 	casper.config.skip.listings = casper.config.skip.listings || [];
 	casper.config.skip.borrowers = casper.config.skip.borrowers || [];
 
