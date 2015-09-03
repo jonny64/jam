@@ -2,36 +2,11 @@ var casper = init_casper ();
 
 login (casper);
 
-navigate_notes_page (casper);
 
 var all_notes = [];
 
-casper.then(function(){
+navigate_notes_api (casper);
 
-	var page = 1;
-
-	casper.repeat(casper.config.pages || 15, function(){
-
-		casper.then(function(){
-			all_notes = all_notes.concat(add_notes(this));
-		});
-
-		casper.then(function(){
-			page++;
-			casper.log('navigate page ' + page, 'debug');
-			this.evaluate(function(){
-				$('.paginate_button.active').next().trigger('click');
-			});
-		}).wait(6000);
-
-		if (casper.config.debug) {
-			casper.then(function screen(){
-				this.captureSelector('notes' + page + '.png', 'html');
-			});
-		}
-	});
-
-});
 
 casper.then(function(){
 
@@ -57,6 +32,52 @@ casper.then(function(){
 
 casper.run();
 casper.viewport(1980, 1080);
+
+function navigate_notes_api (casper) {
+
+	casper.then(function(){
+
+		var page = 1;
+
+		casper.repeat(casper.config.pages || 15, function(){
+
+			casper.thenOpen(jam_datatables_notes_url ((page - 1) * 100, 100), {
+				method: 'get',
+				data:   '',
+				headers: {
+					'Content-type': 'application/json',
+					'Accept': 'application/json, text/javascript, */*; q=0.01',
+					'X-Requested-With': 'XMLHttpRequest'
+				}
+			}, function notes_page_ok(response){
+				var data = JSON.parse(this.getPageContent());
+				require('utils').dump(data.iTotalRecords);
+
+				if (casper.config.debug) {
+					casper.log('total notes count: ' + data.iTotalRecords);
+				}
+
+				var raw_page_notes = data.aaData;
+				all_notes = all_notes.concat(parse_notes(raw_page_notes, this));
+			});
+
+			casper.then(function(){
+				page++;
+				casper.log('navigate page ' + page, 'debug');
+			}).wait(250);
+		});
+
+	});
+}
+
+function jam_datatables_notes_url (start, length) {
+	return "https://btcjam.com/notes/allnotes.json?sEcho=6&iColumns=8&sColumns=,,,,,,,"
+		+ "&iDisplayStart=" + start
+		+ "&iDisplayLength=" + length
+		+ "&mDataProp_0=0&sSearch_0=&bRegex_0=false&bSearchable_0=true&bSortable_0=true&mDataProp_1=1&sSearch_1=&bRegex_1=false"
+		+ "&bSearchable_1=true&bSortable_1=true&mDataProp_2=2&sSearch_2=&bRegex_2=false&bSearchable_2=true&bSortable_2=true&mDataProp_3=3&sSearch_3=&bRegex_3=false&bSearchable_3=true&bSortable_3=false&mDataProp_4=4&sSearch_4=&bRegex_4=false&bSearchable_4=true&bSortable_4=false&mDataProp_5=5&sSearch_5=&bRegex_5=false&bSearchable_5=true&bSortable_5=true&mDataProp_6=6&sSearch_6=&bRegex_6=false&bSearchable_6=true&bSortable_6=true&mDataProp_7=7&sSearch_7=&bRegex_7=false&bSearchable_7=true&bSortable_7=false&sSearch=&bRegex=false&iSortCol_0=2&sSortDir_0=desc&iSortingCols=1"
+		+ "&_=" + Math.random();
+}
 
 function add_notes(casper){
 	var raw_page_notes = casper.evaluate(function(){
@@ -253,7 +274,8 @@ function init_casper() {
 		verbose: true,
 		logLevel: 'debug',
 		pageSettings: {
-			userAgent: 'Mozilla/5.0 (Windows NT 6.1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/41.0.2228.0 Safari/537.36'
+			userAgent: 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0',
+			sslPprotocol: "tlsv1"
 		}
 	});
 
@@ -274,7 +296,10 @@ function init_casper() {
 	casper.on("page.error", function(msg, trace) {
 		this.captureSelector('error.png', 'html');
 		this.log("Page Error: " + msg, "warning");
-		// pushbullet ({'body' : '[aws][btcjam] page error'}, this);
+		for(var i=0; i<trace.length; i++) {
+			var step = trace[i];
+			this.echo('   ' + step.file + ' (line ' + step.line + ')', 'ERROR');
+		}
 	});
 
 	casper.on("error", function(msg, trace) {
@@ -283,17 +308,27 @@ function init_casper() {
 		// pushbullet ({'body' : '[aws][btcjam] page error'}, this);
 	});
 
+	casper.on("wait.timeout", function(msg, trace) {
+		this.captureSelector('error.png', 'html');
+		this.log(msg, "waitTimeout");
+		// pushbullet ({'body' : '[aws][btcjam] page error'}, this);
+	});
+
+	casper.on('resource.error',function (request) {
+	    this.log(request.url + ' ' + request.errorString, 'warning');
+	});
+
 	return casper;
 }
 
 function login(casper) {
-	casper.start(casper.config.url, function login_facebook() {
 
-		if (casper.config.debug) {
-			this.captureSelector('before_login.png', 'html');
-		}
+	casper.start(casper.config.url, function login() {
 
-		casper.wait(250).waitForSelector('#user_email', function fill_login_form() {
+		casper.waitForSelector('#user_email.email', function fill_login_form() {
+			if (this.config.debug) {
+				this.captureSelector('before_login.png', 'html');
+			}
 			this.fill('form#new_user', { 'user[email]': casper.config.user, 'user[password]': casper.config.password }, true);
 		});
 	}, function error_popup(){
@@ -309,18 +344,17 @@ function login(casper) {
 
 function navigate_notes_page(casper) {
 
-	casper.wait(250).thenOpen('https://btcjam.com/notes', function() {
+	casper.wait(250).thenOpen('https://btcjam.com/notes', function open_notes_page() {
 		console.log(this.getTitle() + '\n');
 	});
 
-	casper.waitForText('Note Marketplace');
-
-	casper.then(function(){
-		this.evaluate(function(){
-			$('select[name=allnotes_length]').val(100);
-			return $('select[name=allnotes_length]').trigger('change');
-		});
-	})
+	casper.waitForText('Note Marketplace')
+		.then(function change_note_length_100(){
+			this.evaluate(function(){
+				$('select[name=allnotes_length]').val(100);
+				return $('select[name=allnotes_length]').trigger('change');
+			});
+	});
 
 	var invested_sort = 'th[aria-label*=Invested]';
 	casper.waitForSelector(invested_sort)
