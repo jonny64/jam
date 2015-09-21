@@ -60,7 +60,7 @@ function navigate_notes_api (casper) {
 				all_notes = all_notes.concat(parse_notes(raw_page_notes, this));
 			});
 
-			casper.then(function(){
+			casper.then(function wait_and_open_next_page(){
 				page++;
 				casper.log('navigate page ' + page, 'warning');
 			}).wait(250);
@@ -144,7 +144,7 @@ function parse_notes(raw_page_notes, casper) {
 		var price    = parseFloat(note [5].replace(/^\s*\D/, ''));
 		var remaining = parseFloat(note [4].replace(/^\s*\D/, ''));
 
-		if (price >= invested || price >= remaining) {
+		if (price >= invested || price >= remaining || remaining < 0.01) {
 			continue
 		}
 
@@ -222,9 +222,12 @@ function note_hours_left(html){
 
 function listing_rating(html) {
 
-	var info_regex = /cr-label.*\>\s*(\w)\s*\</g;
+	var info_regex = /cr-label.*\>\s*([\w-]+)\s*\</g;
 	var m = info_regex.exec(html);
 	if (m && m.length) {
+		if (m[1] === '--') {
+			m [1] = 'E';
+		}
 		return m [1];
 	}
 	return html;
@@ -275,8 +278,8 @@ function init_casper() {
 	var casper = require('casper').create({
 		timeout: 240000,
 		waitTimeout: 60000,
-		verbose: config.debug? true : false,
-		logLevel: config.debug? 'debug' : 'warning',
+		verbose: true,
+		logLevel: config.debug? 'debug' : 'info',
 		pageSettings: {
 			userAgent: 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0',
 			sslPprotocol: "tlsv1"
