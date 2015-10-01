@@ -44,9 +44,13 @@ casper.thenOpen(jam_listings_url (), {
 		casper.log('total listings count: ' + data.length);
 	}
 
-	require('utils').dump(data);
+	listings = filter_listings(data);
 
-	notify_listings(data, this);
+	require('utils').dump(listings);
+
+	notify_listings(listings, this);
+
+	write_invest_listings(listings);
 });
 
 casper.run();
@@ -114,15 +118,46 @@ function add_notes(casper){
 	return page_notes;
 }
 
-function notify_listings(listings, casper){
+function filter_listings (listings) {
 
-	var body = '';
-	var subject_postfix = ''
+	var filtered_listings = [];
+
+	var skip_listings = invest_listings();
+
 	for (var i in listings) {
 
 		var listing = listings [i];
+		if (!listing.id || skip_listings.indexOf(listing.id) > -1) {
+			continue;
+		}
 
 		listing.rating = listing_rating_label(listing.repayment_rate_id);
+
+		listing.apr = adjust_float(100 * listing.expected_listing_apr);
+
+		filtered_listings.push(listing);
+	}
+
+	filtered_listings = sort_listings(filtered_listings);
+
+	return filtered_listings;
+}
+
+function notify_listings(listings, casper){
+
+	if (!listings.length) {
+		casper.log('NO NEW LISTINGS FOUND!', 'warning');
+
+		if ((new Date()).getHours() > 5) {
+			return;
+		}
+	}
+
+	var body = '';
+	var subject_postfix = '';
+	for (var i in listings) {
+
+		var listing = listings [i];
 
 		var grade = /A|B|C/g.exec(listing.rating);
 
@@ -130,7 +165,7 @@ function notify_listings(listings, casper){
 			subject_postfix = grade [0];
 		}
 
-		body = body + adjust_float(100 * listing.expected_listing_apr) + ' % ' + listing.rating
+		body = body + listing.apr + ' % ' + listing.rating
 			+ ' ' + listing.title
 			+ '\nexpected loss\t' + adjust_float(listing.expected_listing_loss)
 			+ '\nalgo score\t' + adjust_float(listing.algo_score_listing)
@@ -138,6 +173,7 @@ function notify_listings(listings, casper){
 			+ '\nis risky\t\t' + listing.is_risky
 			+ '\n' + listing_link(listing.id);
 		body = body + '\n\n';
+
 	}
 
 	pushbullet({
@@ -264,6 +300,10 @@ function sort_notes(notes) {
 	return notes.sort(function(a, b){return b.price - a.price});
 }
 
+function sort_listings(listings) {
+	return listings.sort(function(a, b){return b.apr - a.apr});
+}
+
 function note_hours_left(html){
 	var info_regex = /(\d+) ((days|hours)) Left/i;
 	var m = info_regex.exec(html);
@@ -296,7 +336,9 @@ function listing_rating(html) {
 function listing_rating_label(id_rating) {
 
 	var voc_ratings = {
+		77  : "A-",
 		80  : "B-",
+		83  : "C-",
 		109 : "C+"
 	};
 
@@ -337,6 +379,24 @@ function listing_borrower(html) {
 
 function listing_link(id_listing) {
 	return 'http://btcjamtop.com/Listings/Inspect/' + id_listing;
+}
+
+function write_invest_listings(listings){
+	var fs = require('fs');
+
+	var ids = invest_listings();
+
+	for (var i in listings) {
+		ids.push(listings[i].id);
+	}
+
+	fs.write('invest_listings.json', JSON.stringify(ids || []), 'w');
+}
+
+function invest_listings(listings){
+	var fs = require('fs');
+	var listings_json = fs.read('invest_listings.json');
+	return JSON.parse(listings_json) || [];
 }
 
 function init_casper() {
