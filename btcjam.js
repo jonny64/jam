@@ -133,7 +133,13 @@ function filter_listings (listings) {
 
 		listing.rating = listing_rating_label(listing.repayment_rate_id);
 
-		listing.apr = adjust_float(100 * listing.expected_listing_apr);
+		listing.apr = adjust_float(listing.expected_listing_apr);
+
+		listing.expected_return = adjust_float(
+			listing.listing_roi * (1 - listing.expected_listing_loss)  - listing.expected_listing_loss
+		);
+
+		listing.roi = adjust_float(listing.listing_roi);
 
 		filtered_listings.push(listing);
 	}
@@ -165,10 +171,12 @@ function notify_listings(listings, casper){
 			subject_postfix = grade [0];
 		}
 
-		body = body + listing.apr + ' % ' + listing.rating
+		body = body + 100 * listing.expected_return + ' % ' + listing.rating
 			+ ' ' + listing.title
-			+ '\nexpected loss\t' + adjust_float(listing.expected_listing_loss)
-			+ '\nalgo score\t' + adjust_float(listing.algo_score_listing)
+			+ '\napr\t' + 100 * listing.apr + ' % '
+			+ '\nyield\t' + 100 * listing.roi + ' % '
+			+ '\nexpected loss\t' + adjust_float(100 * listing.expected_listing_loss) + ' % '
+			+ '\nalgo score\t' + adjust_float(100 * listing.algo_score_listing)
 			+ '\ndays\t\t\t' + listing.term_days
 			+ '\nis risky\t\t' + listing.is_risky
 			+ '\n' + listing_link(listing.id);
@@ -301,7 +309,7 @@ function sort_notes(notes) {
 }
 
 function sort_listings(listings) {
-	return listings.sort(function(a, b){return b.apr - a.apr});
+	return listings.sort(function(a, b){return b.expected_return - a.expected_return});
 }
 
 function note_hours_left(html){
