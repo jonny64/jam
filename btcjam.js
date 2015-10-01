@@ -29,6 +29,25 @@ casper.then(function(){
 	notify_notes(all_notes, this);
 });
 
+casper.thenOpen(jam_listings_url (), {
+	method: 'get',
+	data:   '',
+	headers: {
+		'Content-type': 'application/json',
+		'Accept': 'application/json, text/javascript, */*; q=0.01',
+		'X-Requested-With': 'XMLHttpRequest'
+	}
+}, function listings_ok(response){
+	var data = JSON.parse(this.getPageContent());
+
+	if (casper.config.debug) {
+		casper.log('total listings count: ' + data.length);
+	}
+
+	require('utils').dump(data);
+
+	notify_listings(data, this);
+});
 
 casper.run();
 casper.viewport(1980, 1080);
@@ -79,6 +98,11 @@ function jam_datatables_notes_url (start, length) {
 		+ "&_=" + Math.random();
 }
 
+function jam_listings_url () {
+	return "https://btcjam.com/listings/f/"
+		+ "30-60-days,90-120-days/usd-tied,btc-tied,eur-tied/a,b,c/safe/no-hide/ns/no/";
+}
+
 function add_notes(casper){
 	var raw_page_notes = casper.evaluate(function(){
 		var notes = $('#allnotes').dataTable();
@@ -88,6 +112,42 @@ function add_notes(casper){
 	var page_notes = parse_notes (raw_page_notes, casper);
 
 	return page_notes;
+}
+
+function notify_listings(listings, casper){
+
+	var body = '';
+	var subject_postfix = ''
+	for (var i in listings) {
+
+		var listing = listings [i];
+
+		listing.rating = listing_rating_label(listing.repayment_rate_id);
+
+		var grade = /A|B|C/g.exec(listing.rating);
+
+		if (grade && grade.length && !subject_postfix) {
+			subject_postfix = grade [0];
+		}
+
+		body = body + adjust_float(100 * listing.expected_listing_apr) + ' % ' + listing.rating
+			+ ' ' + listing.title
+			+ '\nexpected loss\t' + adjust_float(listing.expected_listing_loss)
+			+ '\nalgo score\t' + adjust_float(listing.algo_score_listing)
+			+ '\ndays\t\t\t' + listing.term_days
+			+ '\nis risky\t\t' + listing.is_risky
+			+ '\n' + listing_link(listing.id);
+		body = body + '\n\n';
+	}
+
+	pushbullet({
+		body  : body,
+		title : listings.length + ' new listings found ' + subject_postfix
+	}, casper);
+};
+
+function adjust_float(value) {
+	return parseFloat(value).toFixed(2);
 }
 
 function notify_notes(page_notes, casper){
@@ -231,6 +291,16 @@ function listing_rating(html) {
 		return m [1];
 	}
 	return html;
+}
+
+function listing_rating_label(id_rating) {
+
+	var voc_ratings = {
+		80  : "B-",
+		109 : "C+"
+	};
+
+	return voc_ratings [id_rating] || id_rating;
 }
 
 function listing_payment_cnt(html) {
