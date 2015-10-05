@@ -18,14 +18,17 @@ casper.then(function(){
 casper.then(function(){
 
 	if (!all_notes.length) {
-		casper.log('NO NOTES FOUND! adjust config', 'warning');
+		casper.log('NO NEW NOTES FOUND! adjust config', 'warning');
 
 		if ((new Date()).getHours() > 5) {
 			return;
 		}
 	}
 
-	this.renderJSON(all_notes);
+	require('utils').dump(all_notes);
+
+	write_listings(all_notes, 'note_listings');
+
 	notify_notes(all_notes, this);
 });
 
@@ -50,7 +53,7 @@ casper.thenOpen(jam_listings_url (), {
 
 	notify_listings(listings, this);
 
-	write_invest_listings(listings);
+	write_listings(listings, 'invest_listings');
 });
 
 casper.run();
@@ -122,7 +125,7 @@ function filter_listings (listings) {
 
 	var filtered_listings = [];
 
-	var skip_listings = invest_listings();
+	var skip_listings = skip_listing_ids('invest_listings');
 
 	for (var i in listings) {
 
@@ -228,6 +231,8 @@ function parse_notes(raw_page_notes, casper) {
 
 	var page_notes = [];
 
+	var skip_listings = casper.config.skip.listings.concat(skip_listing_ids('note_listings'));
+
 	for (var i in raw_page_notes) {
 
 		var note = raw_page_notes [i];
@@ -270,7 +275,7 @@ function parse_notes(raw_page_notes, casper) {
 		}
 
 		var id_listing = listing_id(note [1]);
-		if (!id_listing || casper.config.skip.listings.indexOf(id_listing) > -1) {
+		if (!id_listing || skip_listings.indexOf(id_listing) > -1) {
 			continue;
 		}
 
@@ -389,21 +394,21 @@ function listing_link(id_listing) {
 	return 'http://btcjamtop.com/Listings/Inspect/' + id_listing;
 }
 
-function write_invest_listings(listings){
+function write_listings(listings, name){
 	var fs = require('fs');
 
-	var ids = invest_listings();
+	var ids = skip_listing_ids(name);
 
 	for (var i in listings) {
-		ids.push(listings[i].id);
+		ids.push(listings[i].id || listings[i].id_listing);
 	}
 
-	fs.write('invest_listings.json', JSON.stringify(ids || []), 'w');
+	fs.write(name + '.json', JSON.stringify(ids || []), 'w');
 }
 
-function invest_listings(listings){
+function skip_listing_ids(name){
 	var fs = require('fs');
-	var listings_json = fs.read('invest_listings.json');
+	var listings_json = fs.read(name + '.json');
 	return JSON.parse(listings_json) || [];
 }
 
@@ -423,10 +428,6 @@ function init_casper() {
 			sslPprotocol: "tlsv1"
 		}
 	});
-
-	casper.renderJSON = function(what) {
-		return this.log(JSON.stringify(what, null, '  '), 'warning');
-	};
 
 	casper.config = config;
 	casper.config.skip.listings = casper.config.skip.listings || [];
