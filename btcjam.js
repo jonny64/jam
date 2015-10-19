@@ -20,7 +20,7 @@ casper.then(function(){
 	if (!all_notes.length) {
 		casper.log('NO NEW NOTES FOUND! adjust config', 'warning');
 
-		if ((new Date()).getHours() > 5) {
+		if (!is_send_empty_notify ()) {
 			return;
 		}
 	}
@@ -152,12 +152,17 @@ function filter_listings (listings) {
 	return filtered_listings;
 }
 
+function is_send_empty_notify() {
+	var now = new Date();
+	return now.getHours() === 5 && now.getMinutes() <= 10;
+}
+
 function notify_listings(listings, casper){
 
 	if (!listings.length) {
 		casper.log('NO NEW LISTINGS FOUND!', 'warning');
 
-		if ((new Date()).getHours() > 5) {
+		if (!is_send_empty_notify ()) {
 			return;
 		}
 	}
