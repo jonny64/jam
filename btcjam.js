@@ -2,11 +2,26 @@ var casper = init_casper ();
 
 login (casper);
 
+casper.thenOpen(jam_datatables_notes_url (0, 10), jam_datatables_headers(), function notes_page_ping(response){
+
+	var data = JSON.parse(this.getPageContent());
+
+	if (!data.iTotalRecords || data.iTotalRecords == 0 || !data.aaData[0] || !data.aaData[0].length) {
+
+		pushbullet({
+			body  : 'error',
+			title : 'parsing is possibly broken'
+		}, casper);
+
+		casper.log('PARSING BROKEN', 'error');
+
+		casper.bypass(2);
+	}
+});
 
 var all_notes = [];
 
 navigate_notes_api (casper);
-
 
 casper.then(function(){
 
@@ -32,16 +47,11 @@ casper.then(function(){
 	notify_notes(all_notes, this);
 });
 
-casper.thenOpen(jam_listings_url (), {
-	method: 'get',
-	data:   '',
-	headers: {
-		'Content-type': 'application/json',
-		'Accept': 'application/json, text/javascript, */*; q=0.01',
-		'X-Requested-With': 'XMLHttpRequest'
-	}
-}, function listings_ok(response){
+casper.thenOpen(jam_listings_url (), jam_datatables_headers (), function listings_ok(response){
+
 	var data = JSON.parse(this.getPageContent());
+
+	// require('utils').dump(data);
 
 	if (casper.config.debug) {
 		casper.log('total listings count: ' + data.length);
@@ -67,15 +77,7 @@ function navigate_notes_api (casper) {
 
 		casper.repeat(casper.config.pages || 15, function(){
 
-			casper.thenOpen(jam_datatables_notes_url ((page - 1) * 100, 100), {
-				method: 'get',
-				data:   '',
-				headers: {
-					'Content-type': 'application/json',
-					'Accept': 'application/json, text/javascript, */*; q=0.01',
-					'X-Requested-With': 'XMLHttpRequest'
-				}
-			}, function notes_page_ok(response){
+			casper.thenOpen(jam_datatables_notes_url ((page - 1) * 100, 100), jam_datatables_headers (), function notes_page_ok(response){
 				var data = JSON.parse(this.getPageContent());
 
 				if (casper.config.debug) {
@@ -95,6 +97,19 @@ function navigate_notes_api (casper) {
 		});
 
 	});
+}
+
+function jam_datatables_headers() {
+
+	return {
+		method: 'get',
+		data:   '',
+		headers: {
+			'Content-type': 'application/json',
+			'Accept': 'application/json, text/javascript, */*; q=0.01',
+			'X-Requested-With': 'XMLHttpRequest'
+		}
+	};
 }
 
 function jam_datatables_notes_url (start, length) {
