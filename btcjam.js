@@ -82,6 +82,8 @@ function navigate_notes_api (casper) {
 					casper.log('total notes count: ' + data.iTotalRecords);
 				}
 
+				// require('utils').dump(data);
+
 				var raw_page_notes = data.aaData;
 				all_notes = all_notes.concat(parse_notes(raw_page_notes, this));
 			});
@@ -96,12 +98,13 @@ function navigate_notes_api (casper) {
 }
 
 function jam_datatables_notes_url (start, length) {
-	return "https://btcjam.com/notes/allnotes.json?sEcho=6&iColumns=8&sColumns=,,,,,,,"
+
+	return "https://btcjam.com/notes/allnotes.json?sEcho=1&iColumns=9&sColumns=,,,,,,,,"
 		+ "&iDisplayStart=" + start
 		+ "&iDisplayLength=" + length
-		+ "&mDataProp_0=0&sSearch_0=&bRegex_0=false&bSearchable_0=true&bSortable_0=true&mDataProp_1=1&sSearch_1=&bRegex_1=false"
-		+ "&bSearchable_1=true&bSortable_1=true&mDataProp_2=2&sSearch_2=&bRegex_2=false&bSearchable_2=true&bSortable_2=true&mDataProp_3=3&sSearch_3=&bRegex_3=false&bSearchable_3=true&bSortable_3=false&mDataProp_4=4&sSearch_4=&bRegex_4=false&bSearchable_4=true&bSortable_4=false&mDataProp_5=5&sSearch_5=&bRegex_5=false&bSearchable_5=true&bSortable_5=true&mDataProp_6=6&sSearch_6=&bRegex_6=false&bSearchable_6=true&bSortable_6=true&mDataProp_7=7&sSearch_7=&bRegex_7=false&bSearchable_7=true&bSortable_7=false&sSearch=&bRegex=false"
-		+ "&iSortCol_0=2&sSortDir_0=desc&iSortingCols=1"
+		+ "&mDataProp_0=0&sSearch_0=&bRegex_0=false&bSearchable_0=true&bSortable_0=true&mDataProp_1=1&sSearch_1=&bRegex_1=false&bSearchable_1=true&bSortable_1=true&mDataProp_2=2&sSearch_2=&bRegex_2=false&bSearchable_2=true&bSortable_2=true&mDataProp_3=3&sSearch_3=&bRegex_3=false&bSearchable_3=true&bSortable_3=true&mDataProp_4=4&sSearch_4=&bRegex_4=false&bSearchable_4=true&bSortable_4=false&mDataProp_5=5&sSearch_5=&bRegex_5=false&bSearchable_5=true&bSortable_5=false&mDataProp_6=6&sSearch_6=&bRegex_6=false&bSearchable_6=true&bSortable_6=true&mDataProp_7=7&sSearch_7=&bRegex_7=false&bSearchable_7=true&bSortable_7=true&mDataProp_8=8&sSearch_8=&bRegex_8=false&bSearchable_8=true&bSortable_8=false&sSearch=&bRegex=false"
+		+ "&iSortCol_0=3&sSortDir_0=desc&iSortingCols=1"
+		+ "&show_current=true&show_late=true&show_default=true&show_credit_score_a=true&show_credit_score_b=true&show_credit_score_c=true&show_credit_score_d=true&show_credit_score_e=true&filter_yield=0&filter_note_price=0&currency_id=all"
 		+ "&_=" + Math.random();
 }
 
@@ -242,21 +245,21 @@ function parse_notes(raw_page_notes, casper) {
 
 		var note = raw_page_notes [i];
 
-		var payments = listing_payment_cnt(note[3]);
+		var payments = listing_payment_cnt(note[4]);
 		if (payments === -1) { // default
 			continue;
 		}
 
 
-		var yield = parseFloat(note [6].replace(/\>\s*/, '').replace(/\s*\%\s*/, ''));
+		var yield = parseFloat(note [7].replace(/\>\s*/, '').replace(/\s*\%\s*/, ''));
 
 		if (!yield) {
-			yield = note [6];
+			yield = note [7];
 		}
 
-		var invested = parseFloat(note [2].replace(/^\s*\D/, ''));
-		var price    = parseFloat(note [5].replace(/^\s*\D/, ''));
-		var remaining = parseFloat(note [4].replace(/^\s*\D/, ''));
+		var invested = parseFloat(note [3].replace(/^\s*\D/, ''));
+		var price    = parseFloat(note [6].replace(/^\s*\D/, ''));
+		var remaining = parseFloat(note [5].replace(/^\s*\D/, ''));
 
 		if (price >= invested || price >= remaining || remaining < 0.01) {
 			continue
@@ -274,7 +277,7 @@ function parse_notes(raw_page_notes, casper) {
 		}
 
 
-		var hours_left = note_hours_left (note [7]);
+		var hours_left = note_hours_left (note [8]);
 		if (hours_left < (casper.config.skip.hours || 120)) { // only new notes 5, 6 and 7 days left
 			continue;
 		}
@@ -367,6 +370,10 @@ function listing_payment_cnt(html) {
 
 	if (html.indexOf('default') > -1) {
 		return -1;
+	}
+
+	if (html.indexOf('of') == -1) {
+		return html;
 	}
 
 	var info_regex = /(\d+)/g;
