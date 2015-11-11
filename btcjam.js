@@ -6,7 +6,9 @@ casper.thenOpen(jam_datatables_notes_url (0, 10), jam_datatables_headers(), func
 
 	var data = JSON.parse(this.getPageContent());
 
-	if (!data.iTotalRecords || data.iTotalRecords == 0 || !data.aaData[0] || !data.aaData[0].length) {
+	var is_empty = !data.iTotalRecords || data.iTotalRecords == 0 || !data.aaData[0] || !data.aaData[0].length;
+
+	if (is_empty && is_send_empty_notify ()) {
 
 		pushbullet({
 			body  : 'error',
