@@ -4,7 +4,7 @@
 
 NAME=fprieur/docker-casperjs
 VERSION=
-CASPER=docker run --rm -w /mnt/test/ -v `pwd`:/mnt/test $(NAME):$(VERSION) /usr/bin/casperjs \
+CASPER=docker run --rm -a stdout -w /mnt/test/ -v `pwd`:/mnt/test $(NAME):$(VERSION) /usr/bin/casperjs \
 	/mnt/test/$(filter-out $@,$(MAKECMDGOALS))
 
 default:
@@ -20,7 +20,10 @@ selftest:
 	docker run --rm $(NAME):$(VERSION) /usr/bin/casperjs selftest
 
 cron:
-	perl -le 'sleep rand 180' && $(CASPER) &> btcjam.log
+	perl -le 'sleep rand 180' && $(CASPER) &> ./btcjam.log
+
+cron_debug:
+	$(CASPER) &> ./btcjam.log
 
 tag:
 	git tag -d $(VERSION) 2>&1 > /dev/null
