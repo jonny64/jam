@@ -11,7 +11,7 @@ casper.thenOpen(jam_datatables_notes_url (0, 10), jam_datatables_headers(), func
 	if (is_empty && is_send_empty_notify ()) {
 
 		pushbullet({
-			body  : 'error',
+			body  : this.getPageContent(),
 			title : 'parsing is possibly broken'
 		}, casper);
 
