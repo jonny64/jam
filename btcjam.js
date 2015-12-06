@@ -506,7 +506,8 @@ function login(casper) {
 		});
 	}, function error_popup(){
 		this.captureSelector('error_login.png', 'html');
-	}, 15000);
+	}, 15000)
+	.waitForText('Dashboard');
 
 	if (casper.config.debug) {
 		casper.then(function after_submit(){
