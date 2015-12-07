@@ -7,6 +7,10 @@ VERSION=
 CASPER=docker run --rm -a stdout -w /mnt/test/ -v `pwd`:/mnt/test $(NAME):$(VERSION) /usr/bin/casperjs \
 	/mnt/test/$(filter-out $@,$(MAKECMDGOALS))
 
+CASPER_SSL=docker run --rm -a stdout -w /mnt/test/ -v `pwd`:/mnt/test $(NAME):$(VERSION) /usr/bin/casperjs \
+	--ssl-protocol=tlsv1 \
+	/mnt/test/$(filter-out $@,$(MAKECMDGOALS))
+
 default:
 	@echo Please use \'make build\' or \'make test example.js\'
 
@@ -25,6 +29,11 @@ cron:
 cron_debug:
 	$(CASPER) &> ./btcjam.log
 
+loanbase:
+	perl -le 'sleep rand 180' && $(CASPER_SSL)loanbase.js > ./loanbase.log 2>&1
+
+loanbase_debug:
+	$(CASPER_SSL)loanbase.js
 tag:
 	git tag -d $(VERSION) 2>&1 > /dev/null
 	git tag -d latest 2>&1 > /dev/null
