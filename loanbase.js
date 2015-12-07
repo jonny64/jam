@@ -4,7 +4,7 @@ casper.log("init done", "info");
 
 var api_url = "https://api.loanbase.com/api/";
 
-var loans_url = api_url + "loans?status=funding&reputationFrom=0&denomination=btc,usd&term=1,7,14,30,60";
+var loans_url = api_url + "loans?status=funding&reputationFrom=1&denomination=btc,usd&term=1,7,14,30,60";
 
 var loans = [];
 
