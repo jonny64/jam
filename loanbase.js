@@ -94,7 +94,7 @@ casper.then(function invest() {
 			method: "post",
 			data: {
 				loan_id: loan.id,
-				amount: 0.0001,
+				amount: 0.001,
 				rate: loan.rate - 1.02
 			},
 			headers: {
