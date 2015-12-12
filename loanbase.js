@@ -52,38 +52,6 @@ casper.then(function invest_loans(){
 
 casper.then(function invest() {
 
-	var j = 0;
-
-	casper.repeat(loans.length, function invest() {
-
-		var loan = loans [j];
-
-		casper.wait(250).thenOpen("https://loanbase.com/loan/browse/lid/" + loan.id)
-			.waitForText('Suggested Fixed Rate')
-			.then(function determine_fixed_rate(){
-				loan.rate = this.evaluate(function(){
-
-					function listing_suggested_rate(html) {
-
-						var info_regex = /Fixed Rate:\s*([\d\.]+)\s*\%/g;
-						var m = info_regex.exec(html);
-						if (m && m.length) {
-							return m [1];
-						}
-						return html;
-					}
-					var html = $('span:contains(Suggested)').text();
-					return listing_suggested_rate(html);
-				});
-				this.log('rate=' + loan.rate, "info");
-			});
-		j++;
-	});
-});
-
-
-casper.then(function invest() {
-
 	var i = 0;
 
 	casper.repeat(loans.length, function invest() {
@@ -94,8 +62,7 @@ casper.then(function invest() {
 			method: "post",
 			data: {
 				loan_id: loan.id,
-				amount: casper.config.amount || 0.001,
-				// rate: loan.rate - 1.02
+				amount: casper.config.amount || 0.0042,
 			},
 			headers: {
 				"Authorization": "Bearer " + casper.config.token,
