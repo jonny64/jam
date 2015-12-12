@@ -65,7 +65,7 @@ casper.then(function invest() {
 
 					function listing_suggested_rate(html) {
 
-						var info_regex = /Suggested Fixed Rate:\s*([\d\.]+)\s*\%/g;
+						var info_regex = /Fixed Rate:\s*([\d\.]+)\s*\%/g;
 						var m = info_regex.exec(html);
 						if (m && m.length) {
 							return m [1];
@@ -94,8 +94,8 @@ casper.then(function invest() {
 			method: "post",
 			data: {
 				loan_id: loan.id,
-				amount: 0.001,
-				rate: loan.rate - 1.02
+				amount: casper.config.amount || 0.001,
+				// rate: loan.rate - 1.02
 			},
 			headers: {
 				"Authorization": "Bearer " + casper.config.token,
