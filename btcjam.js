@@ -436,8 +436,17 @@ function write_listings(listings, name){
 }
 
 function skip_listing_ids(name){
+
+	var file = name + '.json';
+
 	var fs = require('fs');
-	var listings_json = fs.read(name + '.json');
+
+	if (!fs.isFile(file)) {
+		return [];
+	}
+
+	var listings_json = fs.read(file) || [];
+
 	return JSON.parse(listings_json) || [];
 }
 
