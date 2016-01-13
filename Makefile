@@ -29,6 +29,9 @@ btcjam:
 btcjam_debug:
 	$(CASPER)btcjam.js
 
+btcjam_reset:
+	rm note_listings.json; rm btcjam_run.json
+
 loanbase:
 	perl -le 'sleep rand 180' && $(CASPER_SSL)loanbase.js > ./loanbase.log 2>&1
 

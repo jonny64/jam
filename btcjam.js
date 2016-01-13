@@ -68,6 +68,10 @@ casper.thenOpen(jam_listings_url (), jam_datatables_headers (), function listing
 	write_listings(listings, 'invest_listings');
 });
 
+casper.then(function write_run_flag_step(){
+	write_run_flag('btcjam_run');
+});
+
 casper.run();
 casper.viewport(1980, 1080);
 
@@ -173,8 +177,8 @@ function filter_listings (listings) {
 }
 
 function is_send_empty_notify() {
-	var now = new Date();
-	return now.getHours() === 5 && now.getMinutes() <= 10;
+
+	return !is_run_flag ('btcjam_run');
 }
 
 function notify_listings(listings, casper){
@@ -422,6 +426,21 @@ function listing_borrower(html) {
 function listing_link(id_listing) {
 	return 'http://btcjamtop.com/Listings/Inspect/' + id_listing;
 }
+
+function is_run_flag(name) {
+
+	var fs = require('fs');
+
+	return fs.isFile(name + '.json');
+}
+
+function write_run_flag(name){
+
+	var fs = require('fs');
+
+	fs.write(name + '.json', JSON.stringify({dt: new Date()}), 'w');
+}
+
 
 function write_listings(listings, name){
 	var fs = require('fs');
