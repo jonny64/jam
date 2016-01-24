@@ -44,7 +44,7 @@ casper.then(function(){
 
 	require('utils').dump(all_notes);
 
-	write_listings(all_notes, 'note_listings');
+	write_listings(all_notes, 'notes');
 
 	notify_notes(all_notes, this);
 });
@@ -245,7 +245,7 @@ function notify_notes(page_notes, casper){
 		+ '\nremaining\t' + note.remaining
 		+ '\ninvested\t' + note.invested
 		+ '\npayments\t' + note.payments
-		+ '\ndays\t\t' + note.days
+		+ '\nid\t\t' + note.id
 		+ '\n' + note.url;
 		body = body + '\n\n';
 	}
@@ -260,7 +260,7 @@ function parse_notes(raw_page_notes, casper) {
 
 	var page_notes = [];
 
-	var skip_listings = casper.config.skip.listings.concat(skip_listing_ids('note_listings'));
+	var skip_notes = casper.config.skip.listings.concat(skip_listing_ids('notes'));
 
 	for (var i in raw_page_notes) {
 
@@ -304,7 +304,10 @@ function parse_notes(raw_page_notes, casper) {
 		}
 
 		var id_listing = listing_id(note [1]);
-		if (!id_listing || skip_listings.indexOf(id_listing) > -1) {
+		var id_note = parseInt(note[8].replace(/.*href="\D+(\d+)\D+.*/g, '$1'));
+		var buy_href = note[8].replace(/.*href="([^"]+)".*/g, '$1');
+
+		if (!id_listing || skip_notes.indexOf(id_note) > -1) {
 			continue;
 		}
 
@@ -313,10 +316,13 @@ function parse_notes(raw_page_notes, casper) {
 			continue;
 		}
 
+
 		page_notes.push({
 			rating    : rating,
 			url       : listing_link(id_listing),
 			id_listing : id_listing,
+			id        : id_note,
+			buy_href  : buy_href,
 			borrower  : borrower,
 			payments  : payments,
 			days      : hours_left / 24,
