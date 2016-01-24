@@ -282,7 +282,7 @@ function parse_notes(raw_page_notes, casper) {
 		var price    = parseFloat(note [6].replace(/^\s*\D/, ''));
 		var remaining = parseFloat(note [5].replace(/^\s*\D/, ''));
 
-		if (price >= invested || price >= remaining || remaining < 0.01) {
+		if (price >= invested - 0.0001 || price >= remaining - 0.0001 || remaining < 0.01) {
 			continue
 		}
 
