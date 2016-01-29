@@ -7,6 +7,10 @@ VERSION=
 CASPER=docker run --rm -a stdout -w /mnt/test/ -v `pwd`:/mnt/test $(NAME):$(VERSION) /usr/bin/casperjs \
 	/mnt/test/$(filter-out $@,$(MAKECMDGOALS))
 
+CASPER_LB=docker run --rm -a stdout -w /mnt/test/ -v `pwd`:/mnt/test $(NAME):$(VERSION) /usr/bin/casperjs \
+	--ssl-protocol=any \
+        /mnt/test/$(filter-out $@,$(MAKECMDGOALS))
+
 CASPER_SSL=casperjs --ssl-protocol=any $(filter-out $@,$(MAKECMDGOALS))
 
 default:
@@ -34,10 +38,10 @@ btcjam_notes:
 	$(CASPER_SSL)btcjam_notes.js
 
 loanbase:
-	perl -le 'sleep rand 180' && $(CASPER_SSL)loanbase.js > ./loanbase.log 2>&1
+	perl -le 'sleep rand 180' && $(CASPER_LB)loanbase.js > ./loanbase.log 2>&1
 
 loanbase_debug:
-	$(CASPER)loanbase.js
+	$(CASPER_LB)loanbase.js
 tag:
 	git tag -d $(VERSION) 2>&1 > /dev/null
 	git tag -d latest 2>&1 > /dev/null
