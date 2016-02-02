@@ -4,7 +4,7 @@ casper.log("init done", "info");
 
 var api_url = "https://api.loanbase.com/api/";
 
-var loans_url = api_url + "loans?status=funding&reputationFrom=1&denomination=btc,usd&term=1,7,14,30,60";
+var loans_url = api_url + "loans?status=funding&reputationFrom=1&denomination=btc,usd&term=1,7,14,30,60,90,120";
 
 var loans = [];
 
@@ -103,24 +103,6 @@ function loan_score_ok (casper, loan){
 		|| score.indexOf("B") === 0
 		|| score.indexOf("C") === 0
 	;
-}
-
-function write_listings(listings, name){
-	var fs = require('fs');
-
-	var ids = skip_listing_ids(name);
-
-	for (var i in listings) {
-		ids.push(listings[i].id || listings[i].id_listing);
-	}
-
-	fs.write(name + '.json', JSON.stringify(ids || []), 'w');
-}
-
-function skip_listing_ids(name){
-	var fs = require('fs');
-	var listings_json = fs.read(name + '.json');
-	return JSON.parse(listings_json) || [];
 }
 
 function init_casper() {
