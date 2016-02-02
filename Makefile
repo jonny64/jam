@@ -11,7 +11,7 @@ CASPER_LB=docker run --rm -a stdout -w /mnt/test/ -v `pwd`:/mnt/test $(NAME):$(V
 	--ssl-protocol=any \
         /mnt/test/$(filter-out $@,$(MAKECMDGOALS))
 
-CASPER_SSL=casperjs --ssl-protocol=any $(filter-out $@,$(MAKECMDGOALS))
+CASPER_SSL=/usr/local/bin/casperjs --ssl-protocol=any $(filter-out $@,$(MAKECMDGOALS))
 
 default:
 	@echo Please use \'make build\' or \'make test example.js\'
@@ -32,10 +32,10 @@ btcjam_debug:
 	$(CASPER)btcjam.js
 
 btcjam_reset:
-	rm notes.json; rm btcjam_run.json
+	rm btcjam_run.json
 
 btcjam_notes:
-	$(CASPER_SSL)btcjam_notes.js
+	$(CASPER_SSL)btcjam_notes.js >> ./notes.log 2>&1
 
 loanbase:
 	perl -le 'sleep rand 180' && $(CASPER_LB)loanbase.js > ./loanbase.log 2>&1
