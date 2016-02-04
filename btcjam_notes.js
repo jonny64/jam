@@ -29,23 +29,6 @@ casper.then(function(){
 casper.run();
 casper.viewport(1980, 1080);
 
-function jam_datatables_headers() {
-
-	return {
-		method: 'get',
-		data:   '',
-		headers: {
-			'Content-type': 'application/json',
-			'Accept': 'application/json, text/javascript, */*; q=0.01',
-			'X-Requested-With': 'XMLHttpRequest'
-		}
-	};
-}
-
-function adjust_float(value) {
-	return parseFloat(value).toFixed(2);
-}
-
 function notify_notes(page_notes, casper){
 
 	var body = '';
@@ -127,6 +110,7 @@ function buy_notes(notes, casper) {
 				console.log(response.statusText);
 				note.status = response.statusText;
 				note.bought = response.status == "200";
+					// && this.page.content.indexOf('insufficent') == -1
 			});
 		});
 		processed_notes.push(note);
