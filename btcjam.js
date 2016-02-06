@@ -260,7 +260,7 @@ function parse_notes(raw_page_notes, casper) {
 
 	var page_notes = [];
 
-	var skip_notes = casper.config.skip.listings.concat(skip_listing_ids('notes'));
+	var skip_notes = casper.config.skip.notes.concat(skip_listing_ids('notes'));
 
 	for (var i in raw_page_notes) {
 
@@ -493,7 +493,7 @@ function init_casper() {
 	});
 
 	casper.config = config;
-	casper.config.skip.listings = casper.config.skip.listings || [];
+	casper.config.skip.notes = casper.config.skip.notes || [];
 	casper.config.skip.borrowers = casper.config.skip.borrowers || [];
 
 	casper.on('remote.message', function(msg) {
