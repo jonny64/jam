@@ -95,6 +95,12 @@ function buy_notes(notes, casper) {
 			return;
 		}
 
+		if (note.yield < 10) {
+			note.error = 'too small yield ' + note.yield;
+			console.log(note.error);
+			return;
+		}
+
 		var buy_url = "https://btcjam.com/notes/" + note.id + "/buy";
 
 		casper.then(function BUY_NOTE() {
