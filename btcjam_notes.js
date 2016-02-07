@@ -46,6 +46,10 @@ function notify_notes(page_notes, casper){
 		body = body + note.id + '\n';
 	}
 
+	if (cnt_bought == 0) {
+		return;
+	}
+
 	pushbullet({
 		body  : body,
 		title : 'picked ' + cnt_bought + ' notes'
@@ -83,7 +87,13 @@ function buy_notes(notes, casper) {
 
 	casper.repeat(notes.length, function(){
 
-		var note = {id: notes [i++]};
+		var note = notes [i++];
+
+		if (casper.config.balance > 0 && note.price > casper.config.balance) {
+			note.error = 'p ' + note.price + '; b ' + casper.config.balance;
+			console.log(note.error);
+			return;
+		}
 
 		var buy_url = "https://btcjam.com/notes/" + note.id + "/buy";
 
@@ -110,7 +120,6 @@ function buy_notes(notes, casper) {
 				console.log(response.statusText);
 				note.status = response.statusText;
 				note.bought = response.status == "200";
-					// && this.page.content.indexOf('insufficent') == -1
 			});
 		});
 		processed_notes.push(note);
@@ -202,6 +211,7 @@ function navigate_notes_page(casper) {
 
 	casper.wait(250).thenOpen('https://btcjam.com/notes', function open_notes_page() {
 			console.log(this.getTitle() + '\n');
+			casper.config.balance = parseFloat(this.getHTML('.balance-data').replace(/^\s*\D/, ''));
 		})
 		.waitForResource(/allnotes.json/)
 		.wait(500)

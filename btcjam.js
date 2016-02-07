@@ -44,7 +44,7 @@ casper.then(function(){
 
 	require('utils').dump(all_notes);
 
-	write_listings(all_notes, 'notes');
+	write_json(all_notes, 'notes');
 
 	notify_notes(all_notes, this);
 });
@@ -65,7 +65,7 @@ casper.thenOpen(jam_listings_url (), jam_datatables_headers (), function listing
 
 	notify_listings(listings, this);
 
-	write_listings(listings, 'invest_listings');
+	write_json(listings, 'invest_listings');
 });
 
 casper.then(function write_run_flag_step(){
@@ -149,7 +149,7 @@ function filter_listings (listings) {
 
 	var filtered_listings = [];
 
-	var skip_listings = skip_listing_ids('invest_listings');
+	var skip_listings = ids (load_json('invest_listings'));
 
 	for (var i in listings) {
 
@@ -260,7 +260,7 @@ function parse_notes(raw_page_notes, casper) {
 
 	var page_notes = [];
 
-	var skip_notes = casper.config.skip.notes.concat(skip_listing_ids('notes'));
+	var skip_notes = casper.config.skip.notes.concat(ids(load_json('notes')));
 
 	for (var i in raw_page_notes) {
 
@@ -282,7 +282,7 @@ function parse_notes(raw_page_notes, casper) {
 		var price    = parseFloat(note [6].replace(/^\s*\D/, ''));
 		var remaining = parseFloat(note [5].replace(/^\s*\D/, ''));
 
-		if (price >= invested - 0.0001 || price >= remaining - 0.0001 || remaining < 0.01) {
+		if (price >= invested - 0.0001 || price >= remaining - 0.0001 || remaining < 0.005) {
 			continue
 		}
 
@@ -448,19 +448,29 @@ function write_run_flag(name){
 }
 
 
-function write_listings(listings, name){
-	var fs = require('fs');
+function ids(records) {
 
-	var ids = skip_listing_ids(name);
-
-	for (var i in listings) {
-		ids.push(listings[i].id || listings[i].id_listing);
+	var ids = []
+	for (var i in records) {
+		ids.push(records[i].id || records[i].id_listing);
 	}
-
-	fs.write(name + '.json', JSON.stringify(ids || []), 'w');
+	return ids;
 }
 
-function skip_listing_ids(name){
+function write_json(add_records, name){
+
+	var fs = require('fs');
+
+	var records = load_json(name);
+
+	for (var i in add_records) {
+		records.push(add_records[i]);
+	}
+
+	fs.write(name + '.json', JSON.stringify(records || []), 'w');
+}
+
+function load_json(name){
 
 	var file = name + '.json';
 
@@ -470,9 +480,9 @@ function skip_listing_ids(name){
 		return [];
 	}
 
-	var listings_json = fs.read(file) || [];
+	var json = fs.read(file) || [];
 
-	return JSON.parse(listings_json) || [];
+	return JSON.parse(json) || [];
 }
 
 function init_casper() {
