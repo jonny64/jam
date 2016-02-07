@@ -142,7 +142,11 @@ function login(casper) {
 	}, function error_popup(){
 		this.captureSelector('error_login.png', 'html');
 	}, 15000)
-	.waitForText('Dashboard');
+	.waitForText('Dashboard')
+	.then(function balance(){
+		casper.config.balance = parseFloat(this.getHTML('.balance-data').replace(/^\s*\D/, ''));
+		casper.config.balance = casper.config.balance || 0.1;
+	});
 
 	if (casper.config.debug_listings) {
 		casper.then(function after_submit(){

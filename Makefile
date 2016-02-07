@@ -38,8 +38,10 @@ btcjam_notes:
 	$(CASPER_SSL)btcjam_notes.js >> ./notes.log 2>&1
 
 btcjam_listings:
-	$(CASPER_SSL)btcjam_listings.js 
-	# >> ./listings.log 2>&1
+	$(CASPER_SSL)btcjam_listings.js >> ./listings.log 2>&1
+
+btcjam_listings_debug:
+	$(CASPER_SSL)btcjam_listings.js
 
 loanbase:
 	perl -le 'sleep rand 180' && $(CASPER_LB)loanbase.js > ./loanbase.log 2>&1

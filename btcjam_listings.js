@@ -46,6 +46,10 @@ function notify_listings(page_listings, casper){
 		body = body + listing.id + '\n';
 	}
 
+	if (cnt_bought == 0) {
+		return;
+	}
+
 	common.pushbullet({
 		body  : body,
 		title : 'picked ' + cnt_bought + ' listings'
@@ -67,15 +71,13 @@ function buy_listings(listings, casper) {
 
 	var processed_listings = [];
 
-	var skip_listings = casper.config.skip.listings.concat(
-		common.ids(common.load_json('invested_listings'))
-	);
+	listings = amount_listings(casper, listings);
 
 	casper.repeat(listings.length, function REPEAT_LISTINGS(){
 
 		var listing = listings [i++];
 
-		if (!listing.id || skip_listings.indexOf(listing.id) > -1) {
+		if (!listing.amount) {
 			return;
 		}
 
@@ -86,7 +88,7 @@ function buy_listings(listings, casper) {
 		casper.then(function INVEST_LISTING() {
 
 			var data = {
-				"listing_investment[amount]": casper.config.amount || 0.02,
+				"listing_investment[amount]": listing.amount,
 				user_id: casper.config.investor_id || 120812,
 				listing_id: listing.id,
 				code: null,
@@ -122,6 +124,39 @@ function buy_listings(listings, casper) {
 	});
 
 	return processed_listings;
+}
+
+function amount_listings (casper, listings) {
+
+	var skip_listings = casper.config.skip.listings.concat(
+		common.ids(common.load_json('invested_listings'))
+	);
+
+	var balance = casper.config.balance * 0.5;
+
+	var total_shares = 0;
+	for (var i in listings) {
+		listing.shares = listings [i].expected_return;
+		total_shares = total_shares + listing.shares;
+	}
+
+	for (var i in listings) {
+		var listing = listings [i];
+
+		if (!listing.id || skip_listings.indexOf(listing.id) > -1) {
+			listing.amount = 0;
+			continue;
+		}
+
+		if (listing.expected_return < 0) {
+			listing.amount = 0;
+			continue;
+		}
+
+		listing.amount = balance * listing.shares / total_shares;
+	}
+
+	return listings;
 }
 
 function mark_buy_listings(listings, filename, casper) {

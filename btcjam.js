@@ -210,7 +210,6 @@ function notify_listings(listings, casper){
 			+ '\nexpected loss\t' + adjust_float(100 * listing.expected_listing_loss) + ' % '
 			+ '\nalgo score\t' + adjust_float(100 * listing.algo_score_listing)
 			+ '\ndays\t\t\t' + listing.term_days
-			+ '\nis risky\t\t' + listing.is_risky
 			+ '\n' + listing_link(listing.id);
 		body = body + '\n\n';
 
