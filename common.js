@@ -84,7 +84,7 @@ function init_casper() {
 	var config = JSON.parse(config_file) || {};
 
 	var casper = require('casper').create({
-		timeout: 240000,
+		timeout: 3600 * 1000,
 		waitTimeout: 60000,
 		verbose: true,
 		logLevel: config.debug? 'debug' : 'info',
@@ -126,18 +126,23 @@ function init_casper() {
 	    this.log(request.url + ' ' + request.errorCode + ' ' + request.errorString, 'warning');
 	});
 
+	casper.start(casper.config.url);
+
 	return casper;
 }
 
-function login(casper) {
+function login(casper, mail, password) {
 
-	casper.start(casper.config.url, function login() {
+	mail = mail || casper.config.user;
+	password = password || casper.config.password;
+
+	casper.open(casper.config.url).then(function LOGIN() {
 
 		casper.waitForSelector('#user_email.email', function fill_login_form() {
 			if (this.config.debug) {
 				this.captureSelector('before_login.png', 'html');
 			}
-			this.fill('form#new_user', { 'user[email]': casper.config.user_notes, 'user[password]': casper.config.password_notes }, true);
+			this.fill('form#new_user', { 'user[email]': mail, 'user[password]': password }, true);
 		});
 	}, function error_popup(){
 		this.captureSelector('error_login.png', 'html');
@@ -155,11 +160,40 @@ function login(casper) {
 	}
 }
 
+function logout(casper) {
+
+	var data = {
+		"_method": "delete"
+	};
+
+	var csrf = casper.thenOpen("https://btcjam.com/").waitForResource(/application/).wait(250)
+		.evaluate(function(){
+		return {
+			param: $('meta[name=csrf-param]').attr("content"),
+			token: $('meta[name=csrf-token]').attr("content")
+		};
+	});
+
+	data[csrf.param] = csrf.token;
+
+	casper.thenOpen("https://btcjam.com/users/sign_out", {
+		method: 'post',
+		data: data,
+		headers: {
+			'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+			'Accept': '*/*',
+			'X-Requested-With': 'XMLHttpRequest'
+		}
+	}).wait(250);
+}
+
 module.exports = {
     load_json: load_json,
     write_json: write_json,
     ids: ids,
     init_casper: init_casper,
     login : login,
+    logout: logout,
+    adjust_float: adjust_float,
     pushbullet: pushbullet
 };

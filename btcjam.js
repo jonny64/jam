@@ -49,25 +49,6 @@ casper.then(function(){
 	notify_notes(all_notes, this);
 });
 
-casper.thenOpen(jam_listings_url (), jam_datatables_headers (), function listings_ok(response){
-
-	var data = JSON.parse(this.getPageContent());
-
-	// require('utils').dump(data);
-
-	if (casper.config.debug) {
-		casper.log('total listings count: ' + data.length);
-	}
-
-	listings = filter_listings(data);
-
-	require('utils').dump(listings);
-
-	notify_listings(listings, this);
-
-	write_json(listings, 'invest_listings');
-});
-
 casper.then(function write_run_flag_step(){
 	write_run_flag('btcjam_run');
 });
@@ -129,11 +110,6 @@ function jam_datatables_notes_url (start, length) {
 		+ "&_=" + Math.random();
 }
 
-function jam_listings_url () {
-	return "https://btcjam.com/listings/f/"
-		+ "30-60-days,90-120-days/usd-tied,btc-tied,eur-tied/a,b,c/safe/no-hide/ns/no/";
-}
-
 function add_notes(casper){
 	var raw_page_notes = casper.evaluate(function(){
 		var notes = $('#allnotes').dataTable();
@@ -145,81 +121,11 @@ function add_notes(casper){
 	return page_notes;
 }
 
-function filter_listings (listings) {
-
-	var filtered_listings = [];
-
-	var skip_listings = ids (load_json('invest_listings'));
-
-	for (var i in listings) {
-
-		var listing = listings [i];
-		if (!listing.id || skip_listings.indexOf(listing.id) > -1) {
-			continue;
-		}
-
-		listing.rating = listing_rating_label(listing.repayment_rate_id);
-
-		listing.apr = adjust_float(listing.expected_listing_apr);
-
-		listing.expected_return = adjust_float(
-			listing.listing_roi * (1 - listing.expected_listing_loss)  - listing.expected_listing_loss
-		);
-
-		listing.roi = adjust_float(listing.listing_roi);
-
-		filtered_listings.push(listing);
-	}
-
-	filtered_listings = sort_listings(filtered_listings);
-
-	return filtered_listings;
-}
-
 function is_send_empty_notify() {
 
 	return !is_run_flag ('btcjam_run');
 }
 
-function notify_listings(listings, casper){
-
-	if (!listings.length) {
-		casper.log('NO NEW LISTINGS FOUND!', 'warning');
-
-		if (!is_send_empty_notify ()) {
-			return;
-		}
-	}
-
-	var body = '';
-	var subject_postfix = '';
-	for (var i in listings) {
-
-		var listing = listings [i];
-
-		var grade = /A|B|C/g.exec(listing.rating);
-
-		if (grade && grade.length && !subject_postfix) {
-			subject_postfix = grade [0];
-		}
-
-		body = body + 100 * listing.expected_return + ' % ' + listing.rating
-			+ ' ' + listing.title
-			+ '\napr\t' + 100 * listing.apr + ' % '
-			+ '\nyield\t' + 100 * listing.roi + ' % '
-			+ '\nexpected loss\t' + adjust_float(100 * listing.expected_listing_loss) + ' % '
-			+ '\nalgo score\t' + adjust_float(100 * listing.algo_score_listing)
-			+ '\ndays\t\t\t' + listing.term_days
-			+ '\n' + listing_link(listing.id);
-		body = body + '\n\n';
-
-	}
-
-	pushbullet({
-		body  : body,
-		title : listings.length + ' new listings found ' + subject_postfix
-	}, casper);
-};
 
 function adjust_float(value) {
 	return parseFloat(value).toFixed(2);
@@ -345,10 +251,6 @@ function extend_info_notes(notes) {
 
 function sort_notes(notes) {
 	return notes.sort(function(a, b){return b.price - a.price});
-}
-
-function sort_listings(listings) {
-	return listings.sort(function(a, b){return b.expected_return - a.expected_return});
 }
 
 function note_hours_left(html){

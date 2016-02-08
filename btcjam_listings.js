@@ -2,32 +2,204 @@ var common = require('./common.js');
 
 var casper = common.init_casper ();
 
-if (!check_listings ('invest_listings.json')) {
-	casper.exit();
-}
+var all_listings = [];
 
-common.login (casper);
+function check_listings(response){
 
-var all_listings;
+	if (this.is_found) {
+		return;
+	}
 
-casper.then(function(){
+	var data = JSON.parse(this.getPageContent());
 
-	all_listings = common.load_json('invest_listings.json');
+	if (this.config.debug) {
+		this.log('total listings count: ' + data.length);
+	}
 
+require('utils').dump(data);
+
+	all_listings = filter_listings(data);
+
+	all_listings = amount_listings(this, all_listings);
+
+	if (!all_listings.length) {
+		all_listings = [];
+		return;
+	}
+
+	notify_found_listings(all_listings, this);
+
+	common.write_json(all_listings, 'invest_listings');
+};
+
+casper.then(function make_loop() {
+
+	casper.is_found = false;
+
+	var MAX_ATTEMPTS = 60;
+	var cnt = 0;
+
+	casper.repeat(MAX_ATTEMPTS, function(){
+		if (casper.is_found) {
+			return;
+		}
+
+		casper.then(function is_found_check(){
+
+				casper.is_found = all_listings.length > 0;
+
+				if (casper.is_found) {
+					return;
+				}
+				if (cnt > 0) {
+					casper.wait(60000);
+				}
+				cnt++;
+			})
+			.thenOpen(jam_listings_url (), jam_datatables_headers ())
+			.then(check_listings)
+		;
+	});
+});
+
+casper.then(function final_check(){
+
+	if (!all_listings.length) {
+		casper.exit();
+	}
+});
+
+casper.then(function invest_login(){
+	common.login (casper, casper.config.user_notes, casper.config.password_notes);
+});
+
+casper.then(function buy(){
+	casper.log('BALANCE ' + casper.config.balance, "warning");
+	require('utils').dump(all_listings);
 	all_listings = buy_listings(all_listings, this);
 });
 
-casper.then(function(){
+casper.then(function post_buy(){
 
-	require('utils').dump(all_listings);
+	// require('utils').dump(all_listings);
 
 	notify_listings(all_listings, this);
 
-	mark_buy_listings(all_listings, 'invested_listings.json', this)
+	mark_buy_listings(all_listings, this);
 });
 
 casper.run();
 casper.viewport(1980, 1080);
+
+
+function jam_listings_url () {
+	return "https://btcjam.com/listings/f/"
+		+ "30-60-days,90-120-days/usd-tied,btc-tied,eur-tied/a,b,c/safe/no-hide/ns/no/";
+}
+
+function jam_datatables_headers() {
+
+	return {
+		method: 'get',
+		data:   '',
+		headers: {
+			'Content-type': 'application/json',
+			'Accept': 'application/json, text/javascript, */*; q=0.01',
+			'X-Requested-With': 'XMLHttpRequest'
+		}
+	};
+}
+
+function filter_listings (listings) {
+
+	var filtered_listings = [];
+
+	var skip_listings = common.ids(common.load_json('invest_listings'));
+
+	for (var i in listings) {
+
+		var listing = listings [i];
+		if (!listing.id || skip_listings.indexOf(listing.id) > -1) {
+			continue;
+		}
+
+		listing.rating = listing_rating_label(listing.repayment_rate_id);
+
+		listing.apr = common.adjust_float(listing.expected_listing_apr);
+
+		listing.expected_return = common.adjust_float(
+			listing.listing_roi * (1 - listing.expected_listing_loss)  - listing.expected_listing_loss
+		);
+
+		listing.roi = common.adjust_float(listing.listing_roi);
+
+		filtered_listings.push(listing);
+	}
+
+	filtered_listings = sort_listings(filtered_listings);
+
+	return filtered_listings;
+}
+
+function listing_rating_label(id_rating) {
+
+	var voc_ratings = {
+		77  : "A-",
+		80  : "B-",
+		83  : "C-",
+		109 : "C+"
+	};
+
+	return voc_ratings [id_rating] || id_rating;
+}
+
+function sort_listings(listings) {
+	return listings.sort(function(a, b){return b.expected_return - a.expected_return});
+}
+
+function notify_found_listings(listings, casper){
+
+	if (!listings.length) {
+		casper.log('NO NEW LISTINGS FOUND!', 'warning');
+
+		if (!is_send_empty_notify ()) {
+			return;
+		}
+	}
+
+	var body = '';
+	var subject_postfix = '';
+	for (var i in listings) {
+
+		var listing = listings [i];
+
+		var grade = /A|B|C/g.exec(listing.rating);
+
+		if (grade && grade.length && !subject_postfix) {
+			subject_postfix = grade [0];
+		}
+
+		body = body + 100 * listing.expected_return + ' % ' + listing.rating
+			+ ' ' + listing.title
+			+ '\napr\t' + 100 * listing.apr + ' % '
+			+ '\nyield\t' + 100 * listing.roi + ' % '
+			+ '\nexpected loss\t' + common.adjust_float(100 * listing.expected_listing_loss) + ' % '
+			+ '\nalgo score\t' + common.adjust_float(100 * listing.algo_score_listing)
+			+ '\ndays\t\t\t' + listing.term_days
+			+ '\n' + listing_link(listing.id);
+		body = body + '\n\n';
+
+	}
+
+	common.pushbullet({
+		body  : body,
+		title : listings.length + ' new listings found ' + subject_postfix
+	}, casper);
+};
+
+function listing_link(id_listing) {
+	return 'http://btcjamtop.com/Listings/Inspect/' + id_listing;
+}
 
 function notify_listings(page_listings, casper){
 
@@ -60,18 +232,11 @@ function sort_listings(listings) {
 	return listings.sort(function(a, b){return b.price - a.price});
 }
 
-function check_listings(filename) {
-	var fs = require('fs');
-	return fs.isFile(filename);
-}
-
 function buy_listings(listings, casper) {
 
 	var i = 0;
 
 	var processed_listings = [];
-
-	listings = amount_listings(casper, listings);
 
 	casper.repeat(listings.length, function REPEAT_LISTINGS(){
 
@@ -136,9 +301,10 @@ function amount_listings (casper, listings) {
 
 	var total_shares = 0;
 	for (var i in listings) {
-		listing.shares = listings [i].expected_return <= 0? 0
+
+		listings[i].shares = listings [i].expected_return <= 0? 0
 			: listings [i].expected_return;
-		total_shares = total_shares + listing.shares;
+		total_shares = total_shares + listings[i].shares;
 	}
 
 	for (var i in listings) {
@@ -160,7 +326,7 @@ function amount_listings (casper, listings) {
 	return listings;
 }
 
-function mark_buy_listings(listings, filename, casper) {
+function mark_buy_listings(listings, casper) {
 	common.write_json(listings, 'invested_listings');
 }
 
