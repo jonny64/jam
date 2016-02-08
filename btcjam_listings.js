@@ -136,7 +136,8 @@ function amount_listings (casper, listings) {
 
 	var total_shares = 0;
 	for (var i in listings) {
-		listing.shares = listings [i].expected_return;
+		listing.shares = listings [i].expected_return <= 0? 0
+			: listings [i].expected_return;
 		total_shares = total_shares + listing.shares;
 	}
 
