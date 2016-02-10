@@ -16,16 +16,15 @@ function check_listings(response){
 		this.log('total listings count: ' + data.length);
 	}
 
-require('utils').dump(data);
 
 	all_listings = filter_listings(data);
-
-	all_listings = amount_listings(this, all_listings);
 
 	if (!all_listings.length) {
 		all_listings = [];
 		return;
 	}
+
+// require('utils').dump(all_listings);
 
 	notify_found_listings(all_listings, this);
 
@@ -75,7 +74,8 @@ casper.then(function invest_login(){
 
 casper.then(function buy(){
 	casper.log('BALANCE ' + casper.config.balance, "warning");
-	require('utils').dump(all_listings);
+	all_listings = amount_listings(this, all_listings);
+	// require('utils').dump(all_listings);
 	all_listings = buy_listings(all_listings, this);
 });
 
@@ -240,17 +240,17 @@ function buy_listings(listings, casper) {
 
 	casper.repeat(listings.length, function REPEAT_LISTINGS(){
 
-		var listing = listings [i++];
-
-		if (!listing.amount) {
-			return;
-		}
-
-		listing.url = "https://btcjam.com/listings/" + listing.id;
-
-		var invest_url = listing.url + "/listing_investments";
-
 		casper.then(function INVEST_LISTING() {
+
+			var listing = listings [i++];
+
+			if (!listing.amount) {
+				return;
+			}
+
+			listing.url = "https://btcjam.com/listings/" + listing.id;
+
+			var invest_url = listing.url + "/listing_investments";
 
 			var data = {
 				"listing_investment[amount]": listing.amount,
@@ -280,12 +280,12 @@ function buy_listings(listings, casper) {
 				console.log(response.statusText);
 				listing.status = response.statusText;
 				listing.bought = response.statusText == 'OK';
+				if (listing.bought) {
+					processed_listings.push(listing);
+				}
 			});
-		});
 
-		if (listing.bought) {
-			processed_listings.push(listing);
-		}
+		}).wait(500);
 	});
 
 	return processed_listings;
@@ -299,13 +299,15 @@ function amount_listings (casper, listings) {
 
 	var balance = casper.config.balance * 0.5;
 
-	var total_shares = 0;
+	var total_shares = 0.0;
 	for (var i in listings) {
 
-		listings[i].shares = listings [i].expected_return <= 0? 0
-			: listings [i].expected_return;
+		var expected_return = parseFloat(listings [i].expected_return);
+		listings[i].shares = expected_return <= 0? 0 : expected_return;
 		total_shares = total_shares + listings[i].shares;
 	}
+
+	console.log('total_shares = ' + total_shares);
 
 	for (var i in listings) {
 		var listing = listings [i];
