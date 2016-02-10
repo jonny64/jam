@@ -215,7 +215,10 @@ function notify_listings(page_listings, casper){
 
 		cnt_bought++;
 
-		body = body + listing.id + '\n';
+		body = body + listing.id
+			+ ' ' + listing.amount
+			+ ' (ER ' + listing.expected_return + ')'
+			+ '\n';
 	}
 
 	if (cnt_bought == 0) {
