@@ -10,7 +10,12 @@ function check_listings(response){
 		return;
 	}
 
-	var data = JSON.parse(this.getPageContent());
+	var data = [];
+	try {
+		data = JSON.parse(this.getPageContent());
+	} catch (e) {
+		this.log(e, 'error');
+	}
 
 	if (this.config.debug) {
 		this.log('total listings count: ' + data.length);
