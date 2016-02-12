@@ -305,7 +305,8 @@ function amount_listings (casper, listings) {
 		common.ids(common.load_json('invested_listings'))
 	);
 
-	var balance = casper.config.balance * 0.5;
+	var min_balance = casper.config.min_balance || 0.1;
+	var balance = (casper.config.balance - min_balance) * 0.5;
 
 	var total_shares = 0.0;
 	for (var i in listings) {
