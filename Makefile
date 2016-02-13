@@ -37,6 +37,9 @@ btcjam_reset:
 btcjam_notes:
 	$(CASPER_SSL)btcjam_notes.js > ./notes.log 2>&1
 
+btcjam_notes_debug:
+	$(CASPER_SSL)btcjam_notes.js
+
 btcjam_listings:
 	$(CASPER_SSL)btcjam_listings.js >> ./listings.log 2>&1
 
