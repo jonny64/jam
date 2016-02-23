@@ -25,14 +25,12 @@ var all_notes = [];
 
 navigate_notes_api (casper);
 
-casper.then(function(){
-
-	all_notes = extend_info_notes(all_notes);
+casper.then(function parse_and_sort_notes(){
 
 	all_notes = sort_notes(all_notes);
 });
 
-casper.then(function(){
+casper.then(function notify_found_notes(){
 
 	if (!all_notes.length) {
 		casper.log('NO NEW NOTES FOUND! adjust config', 'warning');
@@ -110,26 +108,11 @@ function jam_datatables_notes_url (start, length) {
 		+ "&_=" + Math.random();
 }
 
-function add_notes(casper){
-	var raw_page_notes = casper.evaluate(function(){
-		var notes = $('#allnotes').dataTable();
-		return notes.fnGetData();
-	});
-
-	var page_notes = parse_notes (raw_page_notes, casper);
-
-	return page_notes;
-}
-
 function is_send_empty_notify() {
 
 	return !is_run_flag ('btcjam_run');
 }
 
-
-function adjust_float(value) {
-	return parseFloat(value).toFixed(2);
-}
 
 function notify_notes(page_notes, casper){
 
@@ -245,10 +228,6 @@ function parse_notes(raw_page_notes, casper) {
 	return page_notes;
 }
 
-function extend_info_notes(notes) {
-	return notes;
-}
-
 function sort_notes(notes) {
 	return notes.sort(function(a, b){return b.price - a.price});
 }
@@ -280,18 +259,6 @@ function listing_rating(html) {
 		return m [1];
 	}
 	return html;
-}
-
-function listing_rating_label(id_rating) {
-
-	var voc_ratings = {
-		77  : "A-",
-		80  : "B-",
-		83  : "C-",
-		109 : "C+"
-	};
-
-	return voc_ratings [id_rating] || id_rating;
 }
 
 function listing_payment_cnt(html) {
@@ -459,39 +426,6 @@ function login(casper) {
 			this.captureSelector('logged_on.png', 'html');
 		});
 	}
-}
-
-function navigate_notes_page(casper) {
-
-	casper.wait(250).thenOpen('https://btcjam.com/notes', function open_notes_page() {
-		console.log(this.getTitle() + '\n');
-	});
-
-	casper.waitForText('Note Marketplace')
-		.then(function change_note_length_100(){
-			this.evaluate(function(){
-				$('select[name=allnotes_length]').val(100);
-				return $('select[name=allnotes_length]').trigger('change');
-			});
-	});
-
-	var invested_sort = 'th[aria-label*=Invested]';
-	casper.waitForSelector(invested_sort)
-		.thenClick(invested_sort)
-		.wait(250)
-		.waitForResource(/allnotes.json.*iSortCol_0=2&sSortDir_0=asc/)
-		.wait(250)
-		.thenClick(invested_sort)
-		.wait(250)
-		.waitForResource(/allnotes.json.*iSortCol_0=2&sSortDir_0=desc/)
-		.wait(500);
-
-	if (casper.config.debug) {
-		casper.then(function screen(){
-			this.captureSelector('notes.png', 'html');
-		});
-	}
-
 }
 
 function pushbullet(options, casper) {
