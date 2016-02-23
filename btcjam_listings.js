@@ -332,6 +332,10 @@ function amount_listings (casper, listings) {
 		}
 
 		listing.amount = balance * listing.shares / total_shares;
+
+		if (listing.amount <= 0) {
+			listing.amount = 0;
+		}
 	}
 
 	return listings;
