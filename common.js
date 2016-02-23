@@ -88,6 +88,7 @@ function init_casper() {
 		waitTimeout: 60000,
 		verbose: true,
 		logLevel: config.debug? 'debug' : 'info',
+		colorizerType: 'Dummy',
 		pageSettings: {
 			userAgent: 'Mozilla/5.0 (Windows NT 6.3; WOW64; rv:40.0) Gecko/20100101 Firefox/40.0'
 		}
