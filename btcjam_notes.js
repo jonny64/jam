@@ -15,15 +15,12 @@ navigate_notes_page (casper);
 var all_notes;
 
 casper.then(function(){
-
-	all_notes = common.load_json('notes.json');
+	all_notes = common.load_json('notes');
 
 	all_notes = buy_notes(all_notes, this);
 });
 
 casper.then(function(){
-
-	require('utils').dump(all_notes);
 
 	notify_notes(all_notes, this);
 
@@ -67,23 +64,25 @@ function check_notes(filename) {
 
 function buy_notes(notes, casper) {
 
+require('utils').dump(all_notes);
+
 	var i = 0;
 
 	var processed_notes = [];
 
-	casper.repeat(notes.length, function(){
+	casper.repeat(notes.length, function note_loop(){
 
 		var note = notes [i++];
 
 		if (casper.config.balance > 0 && note.price > casper.config.balance) {
 			note.error = 'p ' + note.price + '; b ' + casper.config.balance;
-			console.log(note.error);
+			this.log(note.error, 'error');
 			return;
 		}
 
 		if (note.yield < 10) {
 			note.error = 'too small yield ' + note.yield;
-			console.log(note.error);
+			this.log(note.error, 'error');
 			return;
 		}
 
