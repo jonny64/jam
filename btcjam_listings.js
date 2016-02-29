@@ -221,7 +221,7 @@ function notify_listings(page_listings, casper){
 		cnt_bought++;
 
 		body = body + listing.id
-			+ ' ' + listing.amount
+			+ ' ' + common.adjust_float(listing.amount)
 			+ ' (ER ' + listing.expected_return + ')'
 			+ '\n';
 	}
