@@ -11,7 +11,7 @@ CASPER_LB=docker run --rm -a stdout -w /mnt/test/ -v `pwd`:/mnt/test $(NAME):$(V
 	--ssl-protocol=any \
         /mnt/test/$(filter-out $@,$(MAKECMDGOALS))
 
-CASPER_SSL=/usr/local/bin/casperjs --ssl-protocol=any $(filter-out $@,$(MAKECMDGOALS))
+CASPER_SSL=/usr/local/bin/casperjs --ssl-protocol=any
 
 version:
 	$(CASPER) --version
@@ -38,7 +38,7 @@ btcjam_listings:
 	$(CASPER_SSL)btcjam_listings.js >> ./listings.log 2>&1
 
 btcjam_listings_debug:
-	$(CASPER_SSL)btcjam_listings.js
+	$(CASPER_SSL) btcjam_listings.js $(filter-out $@,$(MAKECMDGOALS))
 
 loanbase:
 	perl -le 'sleep rand 180' && $(CASPER_LB)loanbase.js > ./loanbase.log 2>&1

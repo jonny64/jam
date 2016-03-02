@@ -36,8 +36,16 @@ function check_listings(response){
 	common.write_json(all_listings, 'invest_listings');
 };
 
-casper.then(function make_loop() {
+var args = casper.cli.args;
+var listing = args.length == 2? {"id": args[0], "amount_invest": args[1]} : undefined;
 
+if (listing) {
+	all_listings = [listing];
+}
+
+casper.thenBypassIf(listing.id > 0, 1);
+
+casper.then(function make_loop() {
 	casper.is_found = false;
 
 	var MAX_ATTEMPTS = 60;
@@ -221,7 +229,7 @@ function notify_listings(page_listings, casper){
 		cnt_bought++;
 
 		body = body + listing.id
-			+ ' ' + common.adjust_float(listing.amount)
+			+ ' ' + common.adjust_float(listing.amount_invest)
 			+ ' (ER ' + listing.expected_return + ')'
 			+ '\n';
 	}
@@ -252,7 +260,7 @@ function buy_listings(listings, casper) {
 
 			var listing = listings [i++];
 
-			if (!listing.amount) {
+			if (!listing.amount_invest) {
 				return;
 			}
 
@@ -261,7 +269,7 @@ function buy_listings(listings, casper) {
 			var invest_url = listing.url + "/listing_investments";
 
 			var data = {
-				"listing_investment[amount]": listing.amount,
+				"listing_investment[amount]": listing.amount_invest,
 				user_id: casper.config.investor_id || 120812,
 				listing_id: listing.id,
 				code: null,
@@ -321,21 +329,26 @@ function amount_listings (casper, listings) {
 	for (var i in listings) {
 		var listing = listings [i];
 
+		if (listing.amount_invest >= 0) {
+			continue;
+		}
+
 		if (!listing.id || skip_listings.indexOf(listing.id) > -1) {
-			listing.amount = 0;
+			listing.amount_invest = 0;
 			continue;
 		}
 
 		if (listing.expected_return < 0) {
-			listing.amount = 0;
+			listing.amount_invest = 0;
 			continue;
 		}
 
-		listing.amount = balance * listing.shares / total_shares;
+		listing.amount_invest = balance * listing.shares / total_shares;
 
-		if (listing.amount <= 0) {
-			listing.amount = 0;
+		if (listing.amount_invest <= 0) {
+			listing.amount_invest = 0;
 		}
+		console.log('listing ' + listing.id + ' amount ' + listing.amount_invest);
 	}
 
 	return listings;
