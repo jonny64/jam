@@ -32,6 +32,8 @@ navigate_notes_api (casper);
 casper.then(function parse_and_sort_notes(){
 
 	all_notes = sort_notes(all_notes);
+
+	all_notes = extend_info_notes(all_notes);
 });
 
 casper.then(function notify_found_notes(){
@@ -88,6 +90,44 @@ function navigate_notes_api (casper) {
 	});
 }
 
+function extend_info_notes(all_notes){
+
+	casper.then(function(){
+
+		var i = -1;
+
+		casper.repeat(all_notes.length, function(){
+			var note = all_notes[++i];
+
+			if (note.rating !== 'E') {
+				return;
+			}
+
+			casper.thenOpen(jam_listing_url (note.id_listing), jam_datatables_headers (), function listing_ok(response){
+				var data;
+				try {
+					data = JSON.parse(this.getPageContent());
+				} catch (e) {
+					return;
+				}
+
+				if (!data || !data.id) {
+					return;
+				}
+				note.term_days = data.term_days;
+				note.created_at = data.created_at;
+				note.listing_amount = data.amount_funded;
+			});
+		});
+	});
+
+	return all_notes;
+}
+
+function jam_listing_url (id_listing){
+	return 'https://btcjam.com/listings/' + id_listing;
+}
+
 function jam_datatables_headers() {
 
 	return {
@@ -137,6 +177,9 @@ function notify_notes(page_notes, casper){
 		+ '\nremaining\t' + note.remaining
 		+ '\ninvested\t' + note.invested
 		+ '\npayments\t' + note.payments
+		+ '\namount\t' + note.listing_amount
+		+ '\ncreated\t' + note.created_at
+		+ '\nterm\t' + note.term_days
 		+ '\nid\t\t' + note.id
 		+ '\n' + note.url;
 		body = body + '\n\n';

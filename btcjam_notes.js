@@ -74,6 +74,12 @@ require('utils').dump(all_notes);
 
 		var note = notes [i++];
 
+		if (note.rating == 'E' && note.listing_amount < 20) {
+			note.error = 'rating E, amount less than collection limit';
+			this.log(note.error, 'error');
+			return;
+		}
+
 		if (casper.config.balance > 0 && note.price > casper.config.balance) {
 			note.error = 'p ' + note.price + '; b ' + casper.config.balance;
 			this.log(note.error, 'error');
