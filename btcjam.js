@@ -113,11 +113,25 @@ function extend_info_notes(all_notes){
 				note.term_days = data.term_days;
 				note.created_at = data.created_at;
 				note.listing_amount = data.amount_funded;
+				note.number_of_payments = data.number_of_payments;
+				note.nar = calc_nar(note);
 			});
 		});
 	});
 
 	return all_notes;
+}
+
+function calc_nar(note) {
+
+	if (!note.number_of_payments || !note.term_days) {
+		return undefined;
+	}
+
+	note.rest_payments = note.number_of_payments - note.payments;
+	note.rest_period = note.term_days * note.rest_payments / note.number_of_payments;
+	var nar = 100 * Math.pow((100 + note.yield) / 100, 365 / note.rest_period) - 100;
+	return nar.toFixed(2);
 }
 
 function jam_listing_url (id_listing){
@@ -176,6 +190,7 @@ function notify_notes(page_notes, casper){
 		+ '\namount\t' + note.listing_amount
 		+ '\ncreated\t' + note.created_at
 		+ '\nterm\t' + note.term_days
+		+ '\nnar\t' + note.nar
 		+ '\nid\t\t' + note.id
 		+ '\n' + note.url;
 		body = body + '\n\n';
