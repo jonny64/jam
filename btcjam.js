@@ -99,10 +99,6 @@ function extend_info_notes(all_notes){
 		casper.repeat(all_notes.length, function(){
 			var note = all_notes[++i];
 
-			if (note.rating !== 'E') {
-				return;
-			}
-
 			casper.thenOpen(jam_listing_url (note.id_listing), jam_datatables_headers (), function listing_ok(response){
 				var data;
 				try {
