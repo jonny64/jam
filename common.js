@@ -167,15 +167,18 @@ function logout(casper) {
 		"_method": "delete"
 	};
 
-	var csrf = casper.thenOpen("https://btcjam.com/").waitForResource(/application/).wait(250)
-		.evaluate(function(){
-		return {
-			param: $('meta[name=csrf-param]').attr("content"),
-			token: $('meta[name=csrf-token]').attr("content")
-		};
+	casper.thenOpen("https://btcjam.com/").then(function eval_csrf(){
+			var csrf = this.evaluate(function(){
+				return {
+					param: $('meta[name=csrf-param]').attr("content"),
+					token: $('meta[name=csrf-token]').attr("content")
+				};
+			});
+
+			data[csrf.param] = csrf.token;
 	});
 
-	data[csrf.param] = csrf.token;
+
 
 	casper.thenOpen("https://btcjam.com/users/sign_out", {
 		method: 'post',

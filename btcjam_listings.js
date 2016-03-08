@@ -2,6 +2,10 @@ var common = require('./common.js');
 
 var casper = common.init_casper ();
 
+casper.then(function login(){
+	common.login (casper, casper.config.user, casper.config.password);
+})
+
 var all_listings = [];
 
 function check_listings(response){
@@ -84,6 +88,12 @@ casper.then(function final_check(){
 	if (!all_listings.length) {
 		casper.exit();
 	}
+
+	// require('utils').dump(all_listings);
+});
+
+casper.then(function logout(){
+	common.logout(this);
 });
 
 casper.then(function invest_login(){
