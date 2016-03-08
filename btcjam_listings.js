@@ -14,7 +14,7 @@ function check_listings(response){
 	try {
 		data = JSON.parse(this.getPageContent());
 	} catch (e) {
-		this.log(e, 'error');
+		this.log(e.message, 'error');
 	}
 
 	if (this.config.debug) {
@@ -256,15 +256,39 @@ function buy_listings(listings, casper) {
 
 	casper.repeat(listings.length, function REPEAT_LISTINGS(){
 
-		casper.then(function INVEST_LISTING() {
+		var listing = listings [i++];
 
-			var listing = listings [i++];
+		listing.url = "https://btcjam.com/listings/" + listing.id;
 
-			if (!listing.amount_invest) {
+		if (!listing.amount_invest) {
+			return;
+		}
+
+		casper.thenOpen(listing.url, jam_datatables_headers (), function AMOUNT_LISTING(response){
+			var data;
+			try {
+				data = JSON.parse(this.getPageContent());
+			} catch (e) {
+				this.log(e.message, 'error');
 				return;
 			}
 
-			listing.url = "https://btcjam.com/listings/" + listing.id;
+			if (!data || !data.id) {
+				return;
+			}
+
+			listing.amount_funded = data.amount_funded;
+			listing.amount = data.amount;
+			listing.amount_rest = listing.amount - listing.amount_funded;
+
+			if (listing.amount_invest >= listing.amount_rest * 0.8) {
+				listing.amount_invest = listing.amount_rest * 0.8;
+			}
+		});
+
+		casper.thenOpen(listing.url, function INVEST_LISTING() {
+
+			require('utils').dump(listing);
 
 			var invest_url = listing.url + "/listing_investments";
 
