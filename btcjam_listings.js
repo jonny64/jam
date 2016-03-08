@@ -17,6 +17,11 @@ function check_listings(response){
 		this.log(e.message, 'error');
 	}
 
+	if (data.error) {
+		this.log(data.error, 'error');
+		return;
+	}
+
 	if (this.config.debug) {
 		this.log('total listings count: ' + data.length);
 	}
@@ -43,7 +48,7 @@ if (listing) {
 	all_listings = [listing];
 }
 
-casper.thenBypassIf(listing.id > 0, 1);
+casper.thenBypassIf(listing && listing.id > 0, 1);
 
 casper.then(function make_loop() {
 	casper.is_found = false;
