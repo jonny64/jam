@@ -293,6 +293,10 @@ function buy_listings(listings, casper) {
 
 		casper.thenOpen(listing.url, function INVEST_LISTING() {
 
+			if (!listing.amount_invest) {
+				return;
+			}
+
 			require('utils').dump(listing);
 
 			var invest_url = listing.url + "/listing_investments";
