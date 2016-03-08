@@ -8,9 +8,14 @@ casper.then(function notes_login(){
 
 casper.thenOpen(jam_datatables_notes_url (0, 10), jam_datatables_headers(), function notes_page_ping(response){
 
-	var data = JSON.parse(this.getPageContent());
+	var data, is_empty;
+	try {
+		data = JSON.parse(this.getPageContent());
+	} catch (e) {
+		is_empty = 1;
+	}
 
-	var is_empty = !data.iTotalRecords || data.iTotalRecords == 0 || !data.aaData[0] || !data.aaData[0].length;
+	is_empty = is_empty || !data.iTotalRecords || data.iTotalRecords == 0 || !data.aaData[0] || !data.aaData[0].length;
 
 	if (is_empty && is_send_empty_notify ()) {
 
