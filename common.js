@@ -124,7 +124,8 @@ function init_casper() {
 	});
 
 	casper.on('resource.error',function (request) {
-	    this.log(request.url + ' ' + request.errorCode + ' ' + request.errorString, 'warning');
+		var url = request.url.substr(0, 60);
+	    this.log(url + ' ' + request.errorCode + ' ' + request.errorString, 'warning');
 	});
 
 	casper.start(casper.config.url);
