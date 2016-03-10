@@ -48,6 +48,7 @@ require('utils').dump(all_listings);
 
 var args = casper.cli.args;
 var listing = args.length == 2? {"id": args[0], "amount_invest": args[1]} : undefined;
+casper.config.no_notify = listing || args[0] === "no_notify";
 
 if (listing) {
 	all_listings = [listing];
@@ -196,6 +197,10 @@ function sort_listings(listings) {
 
 function notify_found_listings(listings, casper){
 
+	if (casper.config.no_notify) {
+		return;
+	}
+
 	if (!listings.length) {
 		casper.log('NO NEW LISTINGS FOUND!', 'warning');
 
@@ -239,6 +244,10 @@ function listing_link(id_listing) {
 }
 
 function notify_listings(page_listings, casper){
+
+	if (casper.config.no_notify) {
+		return;
+	}
 
 	var body = '';
 	var cnt_bought = 0;
