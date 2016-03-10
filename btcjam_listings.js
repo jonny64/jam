@@ -11,14 +11,18 @@ var all_listings = [];
 function check_listings(response){
 
 	if (this.is_found) {
+		this.log('check_listings found', 'info');
 		return;
 	}
+
+	this.log('check_listings', 'info');
 
 	var data = [];
 	try {
 		data = JSON.parse(this.getPageContent());
 	} catch (e) {
 		this.log(e.message, 'error');
+		return;
 	}
 
 	if (data.error) {
@@ -26,10 +30,7 @@ function check_listings(response){
 		return;
 	}
 
-	if (this.config.debug) {
-		this.log('total listings count: ' + data.length);
-	}
-
+	this.log('total listings count: ' + data.length, 'info');
 
 	all_listings = filter_listings(data);
 
@@ -38,7 +39,7 @@ function check_listings(response){
 		return;
 	}
 
-// require('utils').dump(all_listings);
+require('utils').dump(all_listings);
 
 	notify_found_listings(all_listings, this);
 
@@ -60,7 +61,7 @@ casper.then(function make_loop() {
 	var MAX_ATTEMPTS = 60;
 	var cnt = 0;
 
-	casper.repeat(MAX_ATTEMPTS, function(){
+	casper.repeat(MAX_ATTEMPTS, function loop_check(){
 		if (casper.is_found) {
 			return;
 		}
@@ -73,6 +74,7 @@ casper.then(function make_loop() {
 					return;
 				}
 				if (cnt > 0) {
+					this.log("sleeping for 1 minute...", "info");
 					casper.wait(60000);
 				}
 				cnt++;
@@ -122,7 +124,7 @@ casper.viewport(1980, 1080);
 
 function jam_listings_url () {
 	return "https://btcjam.com/listings/f/"
-		+ "30-60-days,90-120-days/usd-tied,btc-tied,eur-tied/a,b,c/safe/no-hide/ns/no/";
+		+ "30-60-days,90-120-days,180-365-days/usd-tied,btc-tied,eur-tied/a,b,c/safe/no-hide/ns/no";
 }
 
 function jam_datatables_headers() {
@@ -147,6 +149,13 @@ function filter_listings (listings) {
 	for (var i in listings) {
 
 		var listing = listings [i];
+
+		var max_term = casper.config.max_term || 180;
+		if (listing.term_days > max_term) {
+			console.log("skipping listing " + listing.id + " since term " + listing.term_days + " > max_term " + max_term);
+			continue;
+		}
+
 		if (!listing.id || skip_listings.indexOf(listing.id) > -1) {
 			continue;
 		}

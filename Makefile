@@ -38,6 +38,7 @@ btcjam_listings:
 	$(CASPER_SSL) btcjam_listings.js >> ./listings.log 2>&1
 
 btcjam_listings_debug:
+	-rm invest_listings.json
 	$(CASPER_SSL) btcjam_listings.js $(filter-out $@,$(MAKECMDGOALS))
 
 loanbase:
