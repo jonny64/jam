@@ -4,16 +4,11 @@ var casper = common.init_casper ();
 
 casper.then(function login(){
 	common.login (casper, casper.config.user, casper.config.password);
-})
+});
 
 var all_listings = [];
 
-function check_listings(response){
-
-	if (this.is_found) {
-		this.log('check_listings found', 'info');
-		return;
-	}
+function check_listings(){
 
 	this.log('check_listings', 'info');
 
@@ -22,12 +17,13 @@ function check_listings(response){
 		data = JSON.parse(this.getPageContent());
 	} catch (e) {
 		this.log(e.message, 'error');
-		return;
+		require('utils').dump(this.getPageContent().substr(0, 100));
+		return 0;
 	}
 
 	if (data.error) {
 		this.log(data.error, 'error');
-		return;
+		return 0;
 	}
 
 	this.log('total listings count: ' + data.length, 'info');
@@ -36,7 +32,7 @@ function check_listings(response){
 
 	if (!all_listings.length) {
 		all_listings = [];
-		return;
+		return data.length;
 	}
 
 require('utils').dump(all_listings);
@@ -44,6 +40,8 @@ require('utils').dump(all_listings);
 	notify_found_listings(all_listings, this);
 
 	common.write_json(all_listings, 'invest_listings');
+
+	return data.length;
 };
 
 var args = casper.cli.args;
@@ -54,70 +52,92 @@ if (listing) {
 	all_listings = [listing];
 }
 
-casper.thenBypassIf(listing && listing.id > 0, 1);
+if (listing && listing.id) {
+	casper.then(buy_listings).thenBypass(1);
+}
 
-casper.then(function make_loop() {
-	casper.is_found = false;
+casper.then(function(){
+	loop_body.call(this, 0, 60); // 1 hr
+}).run();
 
-	var MAX_ATTEMPTS = 60;
-	var cnt = 0;
 
-	casper.repeat(MAX_ATTEMPTS, function loop_check(){
-		if (casper.is_found) {
-			return;
-		}
-
-		casper.then(function is_found_check(){
-
-				casper.is_found = all_listings.length > 0;
-
-				if (casper.is_found) {
-					return;
-				}
-				if (cnt > 0) {
-					this.log("sleeping for 1 minute...", "info");
-					casper.wait(60000);
-				}
-				cnt++;
-			})
-			.thenOpen(jam_listings_url (), jam_datatables_headers ())
-			.then(check_listings)
-		;
-	});
-});
-
-casper.then(function final_check(){
-
-	if (!all_listings.length) {
-		casper.exit();
+function loop_page(page, max_page){
+	if (page > max_page) {
+		return;
 	}
 
-	// require('utils').dump(all_listings);
-});
+	var page_url = page > 1? ('?page=' + page) : '';
 
-casper.then(function logout(){
-	common.logout(this);
-});
+	this.thenOpen(jam_listings_url () + page_url, jam_datatables_headers ()).wait(500).then(function(){
+		var cnt_listings = check_listings.call(this);
+		this.log('cnt_listings ' + cnt_listings, 'info');
+		var page_size = 10;
+		if (cnt_listings >= page_size) {
+			this.then(function(){
+				loop_page.call(this, page + 1, max_page);
+			});
+		}
+	});
+}
 
-casper.then(function invest_login(){
-	common.login (casper, casper.config.user_notes, casper.config.password_notes);
-});
+function loop_body(cnt, max_cnt){
+	if (cnt >= max_cnt) {
+		return;
+	}
 
-casper.then(function buy(){
-	casper.log('BALANCE ' + casper.config.balance, "warning");
-	all_listings = amount_listings(this, all_listings);
-	// require('utils').dump(all_listings);
-	all_listings = buy_listings(all_listings, this);
-});
+	this.then(function(){
+		loop_page.call(this, 1, 10);
+	});
 
-casper.then(function post_buy(){
+	this.then(function(){
+		if (all_listings.length) {
+			this.then(buy_listings);
+		}
+	});
 
-	// require('utils').dump(all_listings);
+	this.then(function() {
+		this.log("sleeping for 1 minute...", "info");
+		this.wait(60000, function(){
+			loop_body.call(this, cnt + 1, max_cnt);
+		});
+	});
+}
 
-	notify_listings(all_listings, this);
+function buy_listings() {
 
-	mark_buy_listings(all_listings, this);
-});
+	this.then(function logout(){
+		common.logout(this);
+	});
+
+	this.then(function invest_login(){
+		common.login (this, this.config.user_notes, this.config.password_notes);
+	});
+
+	this.then(function buy(){
+		this.log('BALANCE ' + this.config.balance, "warning");
+		all_listings = amount_listings(this, all_listings);
+		// require('utils').dump(all_listings);
+		all_listings = api_buy_listings(all_listings, this);
+	});
+
+	this.then(function post_buy(){
+
+		// require('utils').dump(all_listings);
+
+		notify_listings(all_listings, this);
+
+		mark_buy_listings(all_listings, this);
+	});
+
+	this.then(function logout(){
+		all_listings = [];
+		common.logout(this);
+	});
+
+	this.then(function login(){
+		common.login (this, this.config.user, this.config.password);
+	});
+};
 
 casper.run();
 casper.viewport(1980, 1080);
@@ -281,7 +301,7 @@ function sort_listings(listings) {
 	return listings.sort(function(a, b){return b.price - a.price});
 }
 
-function buy_listings(listings, casper) {
+function api_buy_listings(listings, casper) {
 
 	var i = 0;
 

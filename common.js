@@ -168,7 +168,7 @@ function logout(casper) {
 		"_method": "delete"
 	};
 
-	casper.thenOpen("https://btcjam.com/").then(function eval_csrf(){
+	casper.thenOpen("https://btcjam.com/").wait(500).then(function eval_csrf(){
 			var csrf = this.evaluate(function(){
 				return {
 					param: $('meta[name=csrf-param]').attr("content"),
