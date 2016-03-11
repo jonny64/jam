@@ -241,7 +241,9 @@ function notify_found_listings(listings, casper){
 			subject_postfix = grade [0];
 		}
 
-		body = body + 100 * listing.expected_return.toFixed(2) + ' % ' + listing.rating
+		var er = 100 * (listing.expected_return || 0);
+
+		body = body + er.toFixed(2) + ' % ' + listing.rating
 			+ ' ' + listing.title
 			+ '\napr\t' + 100 * listing.apr + ' % '
 			+ '\nyield\t' + 100 * listing.roi + ' % '
