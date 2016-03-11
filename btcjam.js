@@ -43,6 +43,19 @@ casper.then(function parse_and_sort_notes(){
 
 casper.then(function notify_found_notes(){
 
+		var notes = [];
+
+		for (var i in all_notes) {
+
+				var note = all_notes [i];
+				if (note.skip) {
+						continue;
+				}
+				notes.push(note);
+		}
+
+		all_notes = notes;
+
 	if (!all_notes.length) {
 		casper.log('NO NEW NOTES FOUND! adjust config', 'warning');
 
@@ -120,6 +133,8 @@ function extend_info_notes(all_notes){
 				note.listing_amount = data.amount_funded;
 				note.number_of_payments = data.number_of_payments;
 				note.nar = calc_nar(note);
+				note.skip = note.rating == 'E' && note.listing_amount < 20;
+
 			});
 		});
 	});

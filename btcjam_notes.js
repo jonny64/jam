@@ -74,8 +74,8 @@ require('utils').dump(all_notes);
 
 		var note = notes [i++];
 
-		if (note.rating == 'E' && note.listing_amount < 20) {
-			note.error = 'rating E, amount less than collection limit';
+		if (note.skip) {
+			note.error = 'note.skip';
 			this.log(note.error, 'error');
 			return;
 		}
