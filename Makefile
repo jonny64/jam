@@ -26,7 +26,8 @@ btcjam_debug:
 	$(CASPER)btcjam.js
 
 btcjam_reset:
-	rm btcjam_run.json
+	-rm btcjam_run.json
+	-rm notes.json
 
 btcjam_notes:
 	$(CASPER_SSL) btcjam_notes.js > ./notes.log 2>&1

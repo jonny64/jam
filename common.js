@@ -153,6 +153,7 @@ function login(casper, mail, password) {
 	.then(function balance(){
 		casper.config.balance = parseFloat(this.getHTML('.balance-data').replace(/^\s*\D/, ''));
 		casper.config.balance = casper.config.balance || 0.1;
+		casper.log('logged on as ' + mail + '; balance is ' + casper.config.balance + "\n\n", "warning");
 	});
 
 	if (casper.config.debug_listings) {

@@ -35,11 +35,7 @@ function check_listings(){
 		return data.length;
 	}
 
-require('utils').dump(all_listings);
-
-	notify_found_listings(all_listings, this);
-
-	common.write_json(all_listings, 'invest_listings');
+// require('utils').dump(all_listings);
 
 	return data.length;
 };
@@ -70,6 +66,11 @@ function loop_page(page, max_page){
 
 	this.thenOpen(jam_listings_url () + page_url, jam_datatables_headers ()).wait(500).then(function(){
 		var cnt_listings = check_listings.call(this);
+
+		if (all_listings.length) {
+			this.then(buy_listings);
+		}
+
 		this.log('cnt_listings ' + cnt_listings, 'info');
 		var page_size = 10;
 		if (cnt_listings >= page_size) {
@@ -87,12 +88,6 @@ function loop_body(cnt, max_cnt){
 
 	this.then(function(){
 		loop_page.call(this, 1, 10);
-	});
-
-	this.then(function(){
-		if (all_listings.length) {
-			this.then(buy_listings);
-		}
 	});
 
 	this.then(function() {
@@ -114,7 +109,7 @@ function buy_listings() {
 	});
 
 	this.then(function buy(){
-		this.log('BALANCE ' + this.config.balance, "warning");
+
 		all_listings = amount_listings(this, all_listings);
 		// require('utils').dump(all_listings);
 		all_listings = api_buy_listings(all_listings, this);
@@ -122,11 +117,18 @@ function buy_listings() {
 
 	this.then(function post_buy(){
 
+		var invested_listings = [];
+		for (var i in all_listings) {
+			var listing = all_listings [i];
+			if (listing.amount_invest <= 0) {
+				continue;
+			}
+			invested_listings.push(listing);
+		}
+		all_listings = invested_listings;
 		// require('utils').dump(all_listings);
 
 		notify_listings(all_listings, this);
-
-		mark_buy_listings(all_listings, this);
 	});
 
 	this.then(function logout(){
@@ -165,7 +167,9 @@ function filter_listings (listings) {
 
 	var filtered_listings = [];
 
-	var skip_listings = common.ids(common.load_json('invest_listings'));
+	var skip_listings = casper.config.skip.listings.concat(
+		common.ids(common.load_json('invested_listings'))
+	);
 
 	for (var i in listings) {
 
@@ -194,6 +198,8 @@ function filter_listings (listings) {
 		filtered_listings.push(listing);
 	}
 
+	common.write_json(listings, 'invested_listings');
+
 	filtered_listings = sort_listings(filtered_listings);
 
 	return filtered_listings;
@@ -215,18 +221,10 @@ function sort_listings(listings) {
 	return listings.sort(function(a, b){return b.expected_return - a.expected_return});
 }
 
-function notify_found_listings(listings, casper){
+function found_listings(listings, casper){
 
 	if (casper.config.no_notify) {
-		return;
-	}
-
-	if (!listings.length) {
-		casper.log('NO NEW LISTINGS FOUND!', 'warning');
-
-		if (!is_send_empty_notify ()) {
-			return;
-		}
+		return '';
 	}
 
 	var body = '';
@@ -255,10 +253,7 @@ function notify_found_listings(listings, casper){
 
 	}
 
-	common.pushbullet({
-		body  : body,
-		title : listings.length + ' new listings found ' + subject_postfix
-	}, casper);
+	return body;
 };
 
 function listing_link(id_listing) {
@@ -271,7 +266,7 @@ function notify_listings(page_listings, casper){
 		return;
 	}
 
-	var body = '';
+	var body = found_listings (page_listings, casper);
 	var cnt_bought = 0;
 	for (var i in page_listings) {
 
@@ -283,10 +278,10 @@ function notify_listings(page_listings, casper){
 
 		cnt_bought++;
 
-		body = body + listing.id
+		body = body + '\n' + listing.id
 			+ ' ' + common.adjust_float(listing.amount_invest)
 			+ ' (ER ' + listing.expected_return + ')'
-			+ '\n';
+		;
 	}
 
 	if (cnt_bought == 0) {
@@ -336,8 +331,8 @@ function api_buy_listings(listings, casper) {
 			listing.amount = data.amount;
 			listing.amount_rest = listing.amount - listing.amount_funded;
 
-			if (listing.amount_invest >= listing.amount_rest * 0.8) {
-				listing.amount_invest = listing.amount_rest * 0.8;
+			if (listing.amount_invest >= listing.amount_rest * 0.5) {
+				listing.amount_invest = listing.amount_rest * 0.5;
 			}
 		});
 
@@ -392,10 +387,6 @@ function api_buy_listings(listings, casper) {
 
 function amount_listings (casper, listings) {
 
-	var skip_listings = casper.config.skip.listings.concat(
-		common.ids(common.load_json('invested_listings'))
-	);
-
 	var min_balance = casper.config.min_balance || 0.1;
 	var balance = (casper.config.balance - min_balance) * 0.5;
 
@@ -409,20 +400,20 @@ function amount_listings (casper, listings) {
 
 	console.log('total_shares = ' + total_shares);
 
+	var invest_listings = [];
+
 	for (var i in listings) {
 		var listing = listings [i];
 
 		if (listing.amount_invest >= 0) {
-			continue;
-		}
-
-		if (!listing.id || skip_listings.indexOf(listing.id) > -1) {
-			listing.amount_invest = 0;
+			console.log('listing ' + listing.id + ' amount ' + listing.amount_invest);
+			invest_listings.push(listing);
 			continue;
 		}
 
 		if (listing.expected_return < 0) {
 			listing.amount_invest = 0;
+			console.log('listing ' + listing.id + ' amount ' + listing.amount_invest);
 			continue;
 		}
 
@@ -430,15 +421,16 @@ function amount_listings (casper, listings) {
 
 		if (listing.amount_invest <= 0) {
 			listing.amount_invest = 0;
+			console.log('listing ' + listing.id + ' amount ' + listing.amount_invest);
+			continue;
 		}
+
 		console.log('listing ' + listing.id + ' amount ' + listing.amount_invest);
+
+		invest_listings.push(listing);
 	}
 
-	return listings;
-}
-
-function mark_buy_listings(listings, casper) {
-	common.write_json(listings, 'invested_listings');
+	return invest_listings;
 }
 
 function navigate_listings_page(casper) {
