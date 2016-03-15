@@ -193,6 +193,11 @@ function filter_listings (listings) {
 			listing.listing_roi * (1 - listing.expected_listing_loss)  - listing.expected_listing_loss
 		);
 
+		if (listing.expected_return <= 0) {
+			console.log("skipping listing " + listing.id + " since ER " + listing.expected_return + " is negative");
+			continue;
+		}
+
 		listing.roi = common.adjust_float(listing.listing_roi);
 
 		filtered_listings.push(listing);
@@ -408,12 +413,6 @@ function amount_listings (casper, listings) {
 		if (listing.amount_invest >= 0) {
 			console.log('listing ' + listing.id + ' amount ' + listing.amount_invest);
 			invest_listings.push(listing);
-			continue;
-		}
-
-		if (listing.expected_return < 0) {
-			listing.amount_invest = 0;
-			console.log('listing ' + listing.id + ' amount ' + listing.amount_invest);
 			continue;
 		}
 
