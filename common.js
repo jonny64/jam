@@ -38,7 +38,14 @@ function load_json(name){
 
 	var json = fs.read(file) || [];
 
-	return JSON.parse(json) || [];
+	var data = [];
+	try {
+		data = JSON.parse(json);
+	} catch(e) {
+		console.log("load_json failed: " + e.message + "\n\n");
+	}
+
+	return data;
 }
 
 function pushbullet(options, casper) {
