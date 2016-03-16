@@ -4,6 +4,10 @@ function adjust_float(value) {
 	return parseFloat(value).toFixed(2);
 }
 
+function dt_human(dt_ecma) {
+	return dt_ecma.replace(/T.*/, '').replace(/(\d+)\D(\d+)\D(\d+)/, '$3.$2.$1');
+}
+
 function ids(records) {
 
 	var ids = []
@@ -208,5 +212,6 @@ module.exports = {
     login : login,
     logout: logout,
     adjust_float: adjust_float,
+    dt_human: dt_human,
     pushbullet: pushbullet
 };

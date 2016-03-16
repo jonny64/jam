@@ -208,7 +208,7 @@ function notify_notes(page_notes, casper){
 		+ '\ninvested\t' + note.invested
 		+ '\npayments\t' + note.payments
 		+ '\namount\t' + note.listing_amount
-		+ '\ncreated\t' + note.created_at
+		+ '\ncreated\t' + common.dt_human(note.created_at)
 		+ '\nterm\t' + note.term_days
 		+ '\nnar\t' + note.nar
 		+ '\nid\t\t' + note.id
