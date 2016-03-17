@@ -19,6 +19,12 @@ version:
 selftest:
 	docker run --rm $(NAME):$(VERSION) /usr/bin/casperjs selftest
 
+notes:
+	$(CASPER)notes.js > ./notes.log 2>&1
+
+notes_debug:
+	$(CASPER)notes.js
+
 btcjam:
 	perl -le 'sleep rand 80' && $(CASPER)btcjam.js > ./btcjam.log 2>&1
 
