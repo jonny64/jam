@@ -41,6 +41,7 @@ function loop_page(page, max_page){
 		var cnt_notes = check_notes.call(this);
 
 		if (all_notes.length) {
+			this.log('PAGE ' + page + " FOUND NOTES!\n\n\n", 'info');
 			this.then(buy_notes);
 		}
 
@@ -95,7 +96,7 @@ function buy_notes() {
 
 	this.then(function buy(){
 		require('utils').dump(all_notes);
-		all_notes = api_buy_notes(all_notes, this);
+		api_buy_notes(all_notes, this);
 	});
 
 	this.then(function post_buy(){
@@ -115,7 +116,7 @@ function buy_notes() {
 
 function api_buy_notes(notes, casper) {
 
-require('utils').dump(all_notes);
+require('utils').dump(notes);
 
 	var i = 0;
 
