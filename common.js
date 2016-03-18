@@ -23,7 +23,15 @@ function write_json(add_records, name){
 
 	var records = load_json(name);
 
+	var seen = {};
+	for (var i in records) {
+		seen[records[i].id] = 1;
+	}
+
 	for (var i in add_records) {
+		if (seen[add_records[i].id]) {
+			continue;
+		}
 		records.push(add_records[i]);
 	}
 
@@ -40,10 +48,9 @@ function load_json(name){
 		return [];
 	}
 
-	var json = fs.read(file) || [];
-
 	var data = [];
 	try {
+		var json = fs.read(file) || [];
 		data = JSON.parse(json);
 	} catch(e) {
 		console.log("load_json failed: " + e.message + "\n\n");

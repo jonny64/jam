@@ -44,7 +44,7 @@ function loop_page(page, max_page){
 			this.then(buy_notes);
 		}
 
-		this.log('PAGE ' + page + ' cnt_notes ' + cnt_notes, 'info');
+		this.log('PAGE ' + page + ' cnt_notes ' + cnt_notes + "\n\n\n", 'info');
 
 		this.then(function(){
 			loop_page.call(this, page + 1, max_page);

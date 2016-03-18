@@ -20,26 +20,14 @@ selftest:
 	docker run --rm $(NAME):$(VERSION) /usr/bin/casperjs selftest
 
 notes:
-	$(CASPER)notes.js > ./notes.log 2>&1
+	$(CASPER_SSL) notes.js > ./notes.log 2>&1
 
 notes_debug:
-	$(CASPER)notes.js
-
-btcjam:
-	perl -le 'sleep rand 80' && $(CASPER)btcjam.js > ./btcjam.log 2>&1
-
-btcjam_debug:
-	$(CASPER)btcjam.js
+	$(CASPER_SSL) notes.js
 
 btcjam_reset:
 	-rm btcjam_run.json
 	-rm notes.json
-
-btcjam_notes:
-	$(CASPER_SSL) btcjam_notes.js > ./notes.log 2>&1
-
-btcjam_notes_debug:
-	$(CASPER_SSL) btcjam_notes.js
 
 btcjam_listings:
 	$(CASPER_SSL) btcjam_listings.js >> ./listings.log 2>&1
