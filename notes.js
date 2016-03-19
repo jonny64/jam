@@ -9,6 +9,18 @@ casper.then(function notes_login(){
 
 var all_notes = [];
 
+var args = casper.cli.args;
+var note = args.length == 1? {"id": args[0]} : undefined;
+casper.config.no_notify = note || args[0] === "no_notify";
+
+if (note) {
+	all_notes = [note];
+}
+
+if (note && note.id) {
+	casper.then(buy_notes).thenBypass(1);
+}
+
 casper.then(function(){
 	loop_body.call(this, 0, 50); // 50 round trips
 }).run();

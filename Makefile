@@ -23,7 +23,7 @@ notes:
 	$(CASPER_SSL) notes.js > ./notes.log 2>&1
 
 notes_debug:
-	$(CASPER_SSL) notes.js
+	$(CASPER_SSL) notes.js $(filter-out $@,$(MAKECMDGOALS))
 
 btcjam_reset:
 	-rm btcjam_run.json

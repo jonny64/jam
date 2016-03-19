@@ -5,6 +5,10 @@ function adjust_float(value) {
 }
 
 function dt_human(dt_ecma) {
+	if (!dt_ecma) {
+		return dt_ecma;
+	}
+
 	return dt_ecma.replace(/T.*/, '').replace(/(\d+)\D(\d+)\D(\d+)/, '$3.$2.$1');
 }
 
