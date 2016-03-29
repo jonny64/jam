@@ -285,7 +285,7 @@ function notify_listings(page_listings, casper){
 
 		body = body + '\n' + listing.id
 			+ ' ' + common.adjust_float(listing.amount_invest)
-			+ ' (ER ' + listing.expected_return + ')'
+			+ ' (ER ' + listing.expected_return * 100 + ' %)'
 		;
 	}
 
