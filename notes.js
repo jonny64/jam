@@ -50,18 +50,23 @@ function loop_page(page, max_page){
 	var page_url = jam_datatables_notes_url ((page - 1) * 100, 100);
 
 	this.thenOpen(page_url, jam_datatables_headers ()).wait(500).then(function notes_page_ok(){
-		var cnt_notes = check_notes.call(this);
+		check_notes.call(this);
+	});
 
-		if (all_notes.length) {
+	this.then(function sort_and_filter_notes(){
+		all_notes = sort_notes(all_notes);
+		all_notes = filter_notes(all_notes);
+		var cnt_notes = all_notes.length;
+		if (!this.config.debug_notes && all_notes.length) {
 			this.log('PAGE ' + page + " FOUND NOTES!\n\n\n", 'info');
 			this.then(buy_notes);
 		}
 
 		this.log('PAGE ' + page + ' cnt_notes ' + cnt_notes + "\n\n\n", 'info');
+	});
 
-		this.then(function(){
-			loop_page.call(this, page + 1, max_page);
-		});
+	this.then(function(){
+		loop_page.call(this, page + 1, max_page);
 	});
 }
 
@@ -88,8 +93,6 @@ function check_notes() {
 	all_notes = parse_notes(data.aaData, this);
 
 	all_notes = extend_info_notes(all_notes);
-
-	all_notes = sort_notes(all_notes);
 
 	return all_notes.length;
 }
@@ -198,6 +201,15 @@ function extend_info_notes(all_notes){
 		casper.repeat(all_notes.length, function(){
 			var note = all_notes[++i];
 
+			if (note.rating == 'E') {
+				var min_nar = casper.config.skip.yield;
+				note.skip = note.yield < (min_nar [note.rating] || min_nar["other"] || 500);
+				note.skip = note.skip || note.listing_amount < 10;
+				if (note.skip) {
+					return;
+				}
+			}
+
 			casper.thenOpen(jam_listing_url (note.id_listing), jam_datatables_headers (), function listing_ok(response){
 				var data;
 				try {
@@ -214,8 +226,10 @@ function extend_info_notes(all_notes){
 				note.listing_amount = data.amount_funded;
 				note.number_of_payments = data.number_of_payments;
 				note.nar = calc_nar(note);
-				note.skip = note.rating == 'E' && note.listing_amount < 10;
 
+				var min_nar = casper.config.skip.yield;
+				note.skip = note.nar < (min_nar [note.rating] || min_nar["other"] || 500);
+				require('utils').dump(note);
 			});
 		});
 	});
@@ -232,7 +246,7 @@ function calc_nar(note) {
 	note.rest_payments = note.number_of_payments - note.payments;
 	note.rest_period = note.term_days * note.rest_payments / note.number_of_payments;
 	var nar = 100 * Math.pow((100 + note.yield) / 100, 365 / note.rest_period) - 100;
-	return nar.toFixed(2);
+	return parseFloat(nar.toFixed(2));
 }
 
 function jam_listing_url (id_listing){
@@ -332,14 +346,8 @@ function parse_notes(raw_page_notes, casper) {
 		}
 
 		var rating = listing_rating(note[0]);
-
-		var min_yield = casper.config.skip.yield;
-		if (yield < (min_yield [rating] || min_yield["other"] || 500)) {
-			continue;
-		}
-
-
 		var hours_left = note_hours_left (note [8]);
+
 		if (hours_left < (casper.config.skip.hours || 120)) { // only new notes 5, 6 and 7 days left
 			continue;
 		}
@@ -383,6 +391,20 @@ function parse_notes(raw_page_notes, casper) {
 
 function sort_notes(notes) {
 	return notes.sort(function(a, b){return b.price - a.price});
+}
+
+function filter_notes(notes) {
+
+	var result = [];
+
+	for (var i = notes.length - 1; i >= 0; i--) {
+		if (notes[i].skip) {
+			continue;
+		}
+		result.push(notes[i]);
+	}
+
+	return result;
 }
 
 function note_hours_left(html){
