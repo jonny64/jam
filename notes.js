@@ -214,7 +214,7 @@ function extend_info_notes(all_notes){
 				note.listing_amount = data.amount_funded;
 				note.number_of_payments = data.number_of_payments;
 				note.nar = calc_nar(note);
-				note.skip = note.rating == 'E' && note.listing_amount < 20;
+				note.skip = note.rating == 'E' && note.listing_amount < 10;
 
 			});
 		});
