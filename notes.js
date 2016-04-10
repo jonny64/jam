@@ -295,12 +295,12 @@ function notify_notes(page_notes, casper){
 		+ '\nprice\t\t' + note.price
 		+ '\nremaining\t' + note.remaining
 		+ '\ninvested\t' + note.invested
-		+ '\npayments\t' + note.payments
+		+ '\npayments\t' + note.payments + '/' + note.number_of_payments
 		+ '\namount\t' + note.listing_amount
 		+ '\ncreated\t' + common.dt_human(note.created_at)
-		+ '\nterm\t' + note.term_days
-		+ '\nnar\t' + note.nar
-		+ '\nid\t\t' + note.id
+		+ '\nterm\t\t\t' + note.term_days
+		+ '\nnar\t\t\t' + note.nar
+		+ '\nid\t\t\t' + note.id
 		+ '\n' + note.url;
 		body = body + '\n\n';
 	}
