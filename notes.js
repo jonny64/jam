@@ -288,7 +288,7 @@ function notify_notes(page_notes, casper){
 		var grade = /A|B|C/g.exec(note.rating);
 
 		if (grade && grade.length && !subject_postfix) {
-			subject_postfix = grade [0];
+			subject_postfix = grade [0] + ' ' + note.yield;
 		}
 
 		body = body + note.rating + ' ' + note.yield + ' % ' + note.borrower
