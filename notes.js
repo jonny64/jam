@@ -35,8 +35,8 @@ function loop_body(cnt, max_cnt){
 	});
 
 	this.then(function() {
-		this.log("sleeping for 20 secs...", "info");
-		this.wait(20000, function(){
+		this.log("sleeping for 30 secs...", "info");
+		this.wait(30000, function(){
 			loop_body.call(this, cnt + 1, max_cnt);
 		});
 	});

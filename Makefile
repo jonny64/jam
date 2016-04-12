@@ -20,7 +20,7 @@ selftest:
 	docker run --rm $(NAME):$(VERSION) /usr/bin/casperjs selftest
 
 notes:
-	$(CASPER_SSL) notes.js > ./notes.log 2>&1
+	$(CASPER_SSL) notes.js >> ./notes.log 2>&1
 
 notes_debug:
 	$(CASPER_SSL) notes.js $(filter-out $@,$(MAKECMDGOALS))

@@ -150,6 +150,11 @@ function init_casper() {
 	    this.log(url + ' ' + request.errorCode + ' ' + request.errorString, 'warning');
 	});
 
+	casper.on('timeout', function on_timeout() {
+	    this.log('script timeout');
+	    this.exit();
+	});
+
 	casper.start(casper.config.url);
 
 	return casper;
