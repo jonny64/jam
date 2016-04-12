@@ -338,12 +338,19 @@ function api_buy_listings(listings, casper) {
 
 			if (listing.amount_invest >= listing.amount_rest * 0.5) {
 				listing.amount_invest = listing.amount_rest * 0.5;
+				this.log('listing ' + listing.id + ' corrected amount ' + listing.amount_invest, 'error');
 			}
 		});
 
 		casper.thenOpen(listing.url, function INVEST_LISTING() {
 
 			if (!listing.amount_invest) {
+				return;
+			}
+
+			listing.amount_invest = parseFloat(listing.amount_invest.toFixed(3));
+
+			if (listing.amount_invest <= 0) {
 				return;
 			}
 
