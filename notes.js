@@ -141,7 +141,7 @@ require('utils').dump(notes);
 
 		var note = notes [i++];
 
-		note.skip = note.skip || note.rating == 'E' && note.listing_amount < 10;
+		note.skip = note.skip || (note.rating == 'E' || note.rating == 'D') && note.listing_amount < 10;
 
 		if (note.skip) {
 			note.error = 'note.skip';
@@ -203,7 +203,7 @@ function extend_info_notes(all_notes){
 		casper.repeat(all_notes.length, function(){
 			var note = all_notes[++i];
 
-			if (note.rating == 'E') {
+			if (note.rating == 'E' || note.rating == 'D') {
 				var min_nar = casper.config.skip.yield;
 				note.skip = note.yield < (min_nar [note.rating] || min_nar["other"] || 500);
 				note.skip = note.skip || note.listing_amount < 10;
