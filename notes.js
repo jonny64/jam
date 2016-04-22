@@ -206,13 +206,12 @@ function extend_info_notes(all_notes){
 			if (note.rating == 'E' || note.rating == 'D') {
 				var min_nar = casper.config.skip.yield;
 				note.skip = note.yield < (min_nar [note.rating] || min_nar["other"] || 500);
-				note.skip = note.skip || note.listing_amount < 10;
 				if (note.skip) {
 					return;
 				}
 			}
 
-			casper.thenOpen(jam_listing_url (note.id_listing), jam_datatables_headers (), function listing_ok(response){
+			casper.wait(5000).thenOpen(jam_listing_url (note.id_listing), jam_datatables_headers (), function listing_ok(response){
 				var data;
 				try {
 					data = JSON.parse(this.getPageContent());
@@ -231,6 +230,9 @@ function extend_info_notes(all_notes){
 
 				var min_nar = casper.config.skip.yield;
 				note.skip = note.skip || note.nar < (min_nar [note.rating] || min_nar["other"] || 500);
+				if (note.rating == 'E' || note.rating == 'D') {
+					note.skip = note.skip || note.listing_amount < 10;
+				}
 				require('utils').dump(note);
 			});
 		});
