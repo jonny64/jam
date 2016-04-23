@@ -146,6 +146,7 @@ require('utils').dump(notes);
 		if (note.skip) {
 			note.error = 'note.skip';
 			this.log(note.error, 'error');
+			require('utils').dump(note);
 			return;
 		}
 
