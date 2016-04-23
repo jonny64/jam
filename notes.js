@@ -93,8 +93,6 @@ function check_notes() {
 	all_notes = parse_notes(data.aaData, this);
 
 	all_notes = extend_info_notes(all_notes);
-
-	return all_notes.length;
 }
 
 
@@ -211,11 +209,12 @@ function extend_info_notes(all_notes){
 				}
 			}
 
-			casper.wait(5000).thenOpen(jam_listing_url (note.id_listing), jam_datatables_headers (), function listing_ok(response){
+			casper.wait(500).thenOpen(jam_listing_url (note.id_listing), jam_datatables_headers (), function listing_ok(response){
 				var data;
 				try {
 					data = JSON.parse(this.getPageContent());
 				} catch (e) {
+					this.log(e.message, 'error');
 					return;
 				}
 
