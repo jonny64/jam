@@ -108,7 +108,6 @@ function buy_notes() {
 	});
 
 	this.then(function buy(){
-		require('utils').dump(all_notes);
 		api_buy_notes(all_notes, this);
 	});
 
