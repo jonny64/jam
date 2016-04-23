@@ -138,7 +138,10 @@ require('utils').dump(notes);
 
 		var note = notes [i++];
 
-		note.skip = note.skip || (note.rating == 'E' || note.rating == 'D') && note.listing_amount < 10;
+		note.skip = note.skip
+			|| (note.rating == 'E' || note.rating == 'D') && note.listing_amount < 10
+			|| !note.term_days
+		;
 
 		if (note.skip) {
 			note.error = 'note.skip';
