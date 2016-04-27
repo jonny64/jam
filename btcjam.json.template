@@ -1,17 +1,28 @@
 {
 	"debug" : 0,
+	"debug_notes" : 0,
+	"debug_listings" : 0,
+	"pages" : 14,
+	"min_balance": 0.1,
+	"investor_id": -1,
 	"skip" : {
-		"yield" : {
-			"E" : 1500,
-			"A" : 10,
-			"B" : 10,
-			"other" : 150
-		},
-		"hours" : 120
+			"yield" : {
+					"E" : 800,
+					"A" : 50,
+					"B" : 70,
+					"D" : 1000,
+					"C" : 100,
+					"other" : 150
+			},
+			"hours" : 100,
+			"notes" : [],
+			"borrowers" : []
 	},
 	"url": "https://btcjam.com/users/sign_in?landing_page=mixed",
 	"user" : "@gmail.com",
 	"password" : "",
+	"user_notes" : "@gmail",
+	"password_notes" : "",
 	"pushbullet" : {
 		"email": "@gmail.com",
 		"api_key" : ""
