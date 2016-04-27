@@ -342,7 +342,7 @@ function api_buy_listings(listings, casper) {
 			}
 		});
 
-		casper.thenOpen(listing.url, function INVEST_LISTING() {
+		casper.thenOpen(listing.url).wait(500).then(function INVEST_LISTING() {
 
 			if (!listing.amount_invest) {
 				return;
