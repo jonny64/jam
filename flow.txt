@@ -1,0 +1,45 @@
+var i = 0;
+i +=  $('#alltransactions').dataTable().fnGetData()
+	.map(function(s){ return parseFloat(s[2].replace(/^(-?)\D*/, '$1')) })
+	.reduce(function(prev, s){return prev + s}, 0)
+
+TODO
+ - auto sell defaulted and then late loans with increased discount (once a week)
+
+ $.get('/listing_investments.json?for_user=true&records=800&page=1', function(data){
+ 	var defaults = $.grep(data, function(a){ return a.payment_state == 'defaulted' && !a.selling});
+ 	defaults = defaults.sort(function(a, b){return parseFloat(a.amount_left) - parseFloat(b.amount_left)});
+ 	console.table(defaults);
+ });
+
+ $.get('/listing_investments.json?for_user=true&records=800&page=1', function(data){
+ 	var defaults = $.grep(data, function(a){ return a.payment_state == 'defaulted'});
+ 	defaults = defaults.sort(function(a, b){return parseFloat(a.amount_left) - parseFloat(b.amount_left)});
+ 	defaults.forEach(function(item) {
+ 		var price = parseFloat(item.amount_left) / 6;
+ 		var id = item.id
+		setTimeout(function(){
+		 		var id_investment = id;
+	 			console.log(id_investment);
+				$.post('https://btcjam.com/notes?listing_investment_id=' + id_investment,
+					{listing_investment_id: id_investment, note:{ask_price: price}}
+				);
+			}
+			, 1000 * i
+		);
+ 	});
+ });
+
+
+POST https://btcjam.com/notes?listing_investment_id=701189
+{"listing_investment_id":701189,"code":null,"note":{"id":null,"ask_price":0.00002,"dtclose":null,"note_status_id":null,"listing_investment_id":701189,"created_at":null,"updated_at":null,"user_id":120812,"dtsold":null,"issuer_user_id":null,"bitcoin_price":"0.0","is_reimbursement":false}}
+response
+{"id":329066,"ask_price":"0.00002","dtclose":"2016-05-04","note_status_id":2,"listing_investment_id":701189,"created_at":"2016-04-27T18:09:28.394Z","updated_at":"2016-04-27T18:09:28.394Z","user_id":120812,"dtsold":null,"issuer_user_id":120812,"bitcoin_price":"0.0","is_reimbursement":false}
+
+
+- listing nar to analyze
+
+
+
+
+
