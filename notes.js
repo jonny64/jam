@@ -88,7 +88,9 @@ function check_notes() {
 		return 0;
 	}
 
-	this.log('data.iTotalRecords: ' + data.iTotalRecords, 'info');
+	if (!data.iTotalRecords) {
+		this.log('data.iTotalRecords: ' + data.iTotalRecords, 'error');
+	}
 
 	all_notes = parse_notes(data.aaData, this);
 
@@ -325,6 +327,8 @@ function parse_notes(raw_page_notes, casper) {
 
 	var skip_notes = casper.config.skip.notes.concat(common.ids(common.load_json('notes')));
 
+	var prev_invested = 0;
+
 	for (var i in raw_page_notes) {
 
 		var note = raw_page_notes [i];
@@ -388,6 +392,12 @@ function parse_notes(raw_page_notes, casper) {
 			price     : price,
 			yield     : yield
 		});
+
+		if (prev_invested && prev_invested < invested) {
+			casper.log('prev invested ' + prev_invested + ' < ' + invested + ' curr invested', 'warning');
+		}
+
+		prev_invested = invested;
 	}
 
 	if (casper.config.debug) {
