@@ -128,7 +128,7 @@ function buy_notes() {
 
 function api_buy_notes(notes, casper) {
 
-require('utils').dump(notes);
+	require('utils').dump(notes);
 
 	var i = 0;
 
@@ -235,7 +235,9 @@ function extend_info_notes(all_notes){
 				if (note.rating == 'E' || note.rating == 'D') {
 					note.skip = note.skip || note.listing_amount < 10;
 				}
-				require('utils').dump(note);
+				if (!note.skip || casper.config.debug_notes) {
+					require('utils').dump(note);
+				}
 			});
 		});
 	});
