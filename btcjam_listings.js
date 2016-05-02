@@ -431,6 +431,12 @@ function amount_listings (casper, listings) {
 			continue;
 		}
 
+		var max_invest = casper.config.max_invest;
+
+		if (max_invest > 0 && listing.amount_invest >= max_invest) {
+			listing.amount_invest = max_invest;
+		}
+
 		console.log('listing ' + listing.id + ' amount ' + listing.amount_invest);
 
 		invest_listings.push(listing);
