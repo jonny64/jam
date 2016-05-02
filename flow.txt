@@ -6,29 +6,36 @@ i +=  $('#alltransactions').dataTable().fnGetData()
 TODO
  - auto sell defaulted and then late loans with increased discount (once a week)
 
- $.get('/listing_investments.json?for_user=true&records=800&page=1', function(data){
- 	var defaults = $.grep(data, function(a){ return a.payment_state == 'defaulted' && !a.selling});
- 	defaults = defaults.sort(function(a, b){return parseFloat(a.amount_left) - parseFloat(b.amount_left)});
- 	console.table(defaults);
- });
+$.get('/listing_investments.json?for_user=true&records=800&page=1', function(data){
+	var defaults = $.grep(data, function(a){ return a.payment_state == 'defaulted' && !a.selling});
+	defaults = defaults.sort(function(a, b){return parseFloat(a.amount_left) - parseFloat(b.amount_left)});
+	console.table(defaults);
+});
 
- $.get('/listing_investments.json?for_user=true&records=800&page=1', function(data){
- 	var defaults = $.grep(data, function(a){ return a.payment_state == 'defaulted'});
- 	defaults = defaults.sort(function(a, b){return parseFloat(a.amount_left) - parseFloat(b.amount_left)});
- 	defaults.forEach(function(item) {
- 		var price = parseFloat(item.amount_left) / 6;
- 		var id = item.id
+$.get('/listing_investments.json?for_user=true&records=300&page=1', function(data){
+	var defaults = $.grep(data, function(a){ return a.payment_state.indexOf('late 31') > -1  && !a.selling});
+	defaults = defaults.sort(function(a, b){return parseFloat(a.amount_left) - parseFloat(b.amount_left)});
+	console.table(defaults);
+});
+
+$.get('/listing_investments.json?for_user=true&records=800&page=1', function(data){
+	var defaults = $.grep(data, function(a){ return a.payment_state == 'defaulted' && !a.selling});
+	defaults = defaults.sort(function(a, b){return parseFloat(a.amount_left) - parseFloat(b.amount_left)});
+	defaults.forEach(function(item) {
+		var price = parseFloat(item.amount_left) / 6;
+		var id = item.id
 		setTimeout(function(){
-		 		var id_investment = id;
-	 			console.log(id_investment);
+				var id_investment = id;
+				console.log(id_investment);
 				$.post('https://btcjam.com/notes?listing_investment_id=' + id_investment,
 					{listing_investment_id: id_investment, note:{ask_price: price}}
 				);
 			}
 			, 1000 * i
 		);
- 	});
- });
+	});
+});
+
 
 
 POST https://btcjam.com/notes?listing_investment_id=701189
