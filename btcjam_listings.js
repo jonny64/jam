@@ -26,9 +26,11 @@ function check_listings(){
 		return 0;
 	}
 
-	this.log('total listings count: ' + data.length, 'info');
+	if (!data.length) {
+		this.log('data.length: ' + data.length, 'error');
+	}
 
-	all_listings = filter_listings(data);
+	all_listings = filter_listings.call(this, data);
 
 	if (!all_listings.length) {
 		all_listings = [];
@@ -177,7 +179,7 @@ function filter_listings (listings) {
 
 		var max_term = casper.config.max_term || 180;
 		if (listing.term_days > max_term) {
-			console.log("skipping listing " + listing.id + " since term " + listing.term_days + " > max_term " + max_term);
+			this.log("skipping listing " + listing.id + " since term " + listing.term_days + " > max_term " + max_term, 'info');
 			continue;
 		}
 
@@ -194,7 +196,7 @@ function filter_listings (listings) {
 		);
 
 		if (listing.expected_return <= 0) {
-			console.log("skipping listing " + listing.id + " since ER " + listing.expected_return + " is negative");
+			this.log("skipping listing " + listing.id + " since ER " + listing.expected_return + " is negative", 'info');
 			continue;
 		}
 
