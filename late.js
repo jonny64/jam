@@ -151,6 +151,7 @@ function sell_investments(investments) {
 			if (investment.sell_status == 'OK') {
 				processed_investments.push(investment);
 			}
+			this.exit();
 		}).wait(1500).then(navigate_investments_page);
 
 	});

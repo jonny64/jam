@@ -37,7 +37,7 @@ btcjam_listings_debug:
 	$(CASPER_SSL) btcjam_listings.js $(filter-out $@,$(MAKECMDGOALS))
 
 late:
-	$(CASPER_SSL) late.js >> ./late.log 2>&1
+	perl -le 'sleep rand 900' && $(CASPER_SSL) late.js >> ./late.log 2>&1
 
 late_debug:
 	$(CASPER_SSL) late.js
