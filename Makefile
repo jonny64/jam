@@ -36,6 +36,12 @@ btcjam_listings_debug:
 	-rm invest_listings.json
 	$(CASPER_SSL) btcjam_listings.js $(filter-out $@,$(MAKECMDGOALS))
 
+late:
+	$(CASPER_SSL) late.js >> ./late.log 2>&1
+
+late_debug:
+	$(CASPER_SSL) late.js
+
 loanbase:
 	perl -le 'sleep rand 180' && $(CASPER_LB)loanbase.js > ./loanbase.log 2>&1
 

@@ -18,6 +18,9 @@
 			"notes" : [],
 			"borrowers" : []
 	},
+	"discount": {
+		"defaulted": 0.125
+	},
 	"url": "https://btcjam.com/users/sign_in?landing_page=mixed",
 	"user" : "@gmail.com",
 	"password" : "",
