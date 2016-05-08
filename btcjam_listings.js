@@ -28,6 +28,7 @@ function check_listings(){
 
 	if (!data.length) {
 		this.log('data.length: ' + data.length, 'error');
+		require('utils').dump(data);
 	}
 
 	all_listings = filter_listings.call(this, data);
