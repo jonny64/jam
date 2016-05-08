@@ -8,7 +8,7 @@ casper.then(function login(){
 
 var all_listings = [];
 
-function check_listings(){
+function check_listings(page){
 
 	this.log('check_listings', 'info');
 
@@ -26,7 +26,7 @@ function check_listings(){
 		return 0;
 	}
 
-	if (!data.length) {
+	if (page > 1 && !data.length) {
 		this.log('data.length: ' + data.length, 'error');
 		require('utils').dump(data);
 	}
@@ -68,7 +68,7 @@ function loop_page(page, max_page){
 	var page_url = page > 1? ('?page=' + page) : '';
 
 	this.thenOpen(jam_listings_url () + page_url, jam_datatables_headers ()).wait(500).then(function(){
-		var cnt_listings = check_listings.call(this);
+		var cnt_listings = check_listings.call(this, page);
 
 		if (all_listings.length) {
 			this.then(buy_listings);
