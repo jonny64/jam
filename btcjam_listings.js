@@ -28,7 +28,7 @@ function check_listings(page){
 
 	if (page > 1 && !data.length) {
 		this.log('data.length: ' + data.length, 'error');
-		require('utils').dump(data);
+		require('utils').dump(this.getPageContent().substr(0, 100));
 	}
 
 	all_listings = filter_listings.call(this, data);
