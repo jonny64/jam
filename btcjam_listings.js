@@ -302,10 +302,6 @@ function notify_listings(page_listings, casper){
 	}, casper);
 };
 
-function sort_listings(listings) {
-	return listings.sort(function(a, b){return b.price - a.price});
-}
-
 function api_buy_listings(listings, casper) {
 
 	var i = 0;
