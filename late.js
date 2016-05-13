@@ -102,6 +102,44 @@ function calc_price_investments(investments) {
 	return investments;
 }
 
+function comment_investments(investment) {
+
+	if (!investment.listing) {
+		return {};
+	}
+
+	investment.id_listing = investment.listing.id;
+
+	if (!investment.id_listing) {
+		return {};
+	}
+
+	var tails = [
+		''
+		, '. Visit Notes Marketplace.'
+		, '. See Notes Marketplace.'
+		, '. See Notes Marketplace. Thank you.'
+	];
+
+	var tail = tails[random_integer(0, tails.length)];
+	tail = tail? tail : '';
+
+	return {
+		url: "https://btcjam.com/listings/" + investment.id_listing + "/comments",
+		data: {
+			"utf8": "%E2%9C%93",
+			"comment[comment]": "Notes available for this loan. Over 5000% yield" + tail,
+			"commit": "Create Comment"
+		}
+	};
+}
+
+function random_integer(min, max) {
+	var rand = min - 0.5 + Math.random() * (max - min + 1)
+	rand = Math.round(rand);
+	return rand;
+}
+
 function sell_investments(investments) {
 
 	var i = 0;
@@ -120,6 +158,8 @@ function sell_investments(investments) {
 			return;
 		}
 
+		var comment = comment_investments(investment);
+
 		var data = {
 			listing_investment_id: investment.id,
 			"note[ask_price]": investment.sell_price
@@ -133,6 +173,9 @@ function sell_investments(investments) {
 		});
 
 		data[csrf.param] = csrf.token;
+		if (comment && comment.url && comment.data) {
+			comment.data[csrf.param]= csrf.token;
+		}
 
 		if (this.config.debug) {
 			require('utils').dump(data);
@@ -152,8 +195,22 @@ function sell_investments(investments) {
 			if (investment.sell_status == 'OK') {
 				processed_investments.push(investment);
 			}
+		})
+		.wait(11500)
+		.thenOpen(comment.url, {
+			method: 'post',
+			data: comment.data,
+			headers: {
+				'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+				'Accept': '*/*',
+				'X-Requested-With': 'XMLHttpRequest'
+			}
+		}).then(function (response){
+			this.log(response.statusText, 'info');
 			this.exit();
-		}).wait(1500).then(navigate_investments_page);
+		})
+		.wait(1500)
+		.then(navigate_investments_page);
 
 	});
 

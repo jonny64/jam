@@ -5,6 +5,7 @@ i +=  $('#alltransactions').dataTable().fnGetData()
 
 TODO
  - auto sell defaulted and then late loans with increased discount (once a week)
+ - listing nar to analyze
 
 $.get('/listing_investments.json?for_user=true&records=800&page=1', function(data){
 	var defaults = $.grep(data, function(a){ return a.payment_state == 'defaulted' && !a.selling});
@@ -37,16 +38,7 @@ $.get('/listing_investments.json?for_user=true&records=800&page=1', function(dat
 });
 
 
-
-POST https://btcjam.com/notes?listing_investment_id=701189
-{"listing_investment_id":701189,"code":null,"note":{"id":null,"ask_price":0.00002,"dtclose":null,"note_status_id":null,"listing_investment_id":701189,"created_at":null,"updated_at":null,"user_id":120812,"dtsold":null,"issuer_user_id":null,"bitcoin_price":"0.0","is_reimbursement":false}}
-response
-{"id":329066,"ask_price":"0.00002","dtclose":"2016-05-04","note_status_id":2,"listing_investment_id":701189,"created_at":"2016-04-27T18:09:28.394Z","updated_at":"2016-04-27T18:09:28.394Z","user_id":120812,"dtsold":null,"issuer_user_id":120812,"bitcoin_price":"0.0","is_reimbursement":false}
-
-
-- listing nar to analyze
-
-
-
-
-
+- comment
+https://btcjam.com/listings/48753/comments/new
+https://btcjam.com/listings/48753/comments
+$.post('https://btcjam.com/listings/48834/comments?utf8=%E2%9C%93&comment%5Bcomment%5D=Notes+available+for+this+loan.+Over+5000%25+yield.+See+Notes+Marketplace.&commit=Create+Comment', function(data){console.log(data)})
