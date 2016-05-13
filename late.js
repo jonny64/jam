@@ -86,6 +86,7 @@ function loop_page(page, max_page){
 
 function calc_price_investments(investments) {
 	investments = investments.filter(function(a){return a.payment_state == 'defaulted' && !a.selling});
+	investments = investments.sort(function(a, b){return parseFloat(a.amount_left) - parseFloat(b.amount_left)});
 
 	var default_price = 0.125;
 	var discount = this.config.discount? this.config.discount.defaulted : default_price;
