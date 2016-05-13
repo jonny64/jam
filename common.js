@@ -150,13 +150,25 @@ function init_casper() {
 
 	casper.on('resource.error',function (request) {
 		var url = request.url.substr(0, 60);
-	    this.log(url + ' ' + request.errorCode + ' ' + request.errorString, 'warning');
+		this.log(url + ' ' + request.errorCode + ' ' + request.errorString, 'warning');
 	});
 
 	casper.on('timeout', function on_timeout() {
-	    this.log('script timeout');
-	    this.exit();
+		this.log('script timeout');
+		this.exit();
 	});
+
+	(function(log) {
+		casper.log = function() {
+
+			if (arguments && arguments[0]) {
+				var now = new Date();
+				now = '[' + now.toISOString().replace('T', ' ').replace(/\.\d+Z/g, '') + '] ';
+				arguments[0] = now + arguments[0];
+			}
+			return log.apply(this, arguments);
+		};
+	})(casper.log);
 
 	casper.start(casper.config.url);
 
@@ -224,13 +236,13 @@ function logout(casper) {
 }
 
 module.exports = {
-    load_json: load_json,
-    write_json: write_json,
-    ids: ids,
-    init_casper: init_casper,
-    login : login,
-    logout: logout,
-    adjust_float: adjust_float,
-    dt_human: dt_human,
-    pushbullet: pushbullet
+	load_json: load_json,
+	write_json: write_json,
+	ids: ids,
+	init_casper: init_casper,
+	login : login,
+	logout: logout,
+	adjust_float: adjust_float,
+	dt_human: dt_human,
+	pushbullet: pushbullet
 };
