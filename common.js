@@ -105,6 +105,9 @@ function init_casper() {
 	var config_file = fs.read('btcjam.json');
 	var config = JSON.parse(config_file) || {};
 
+
+	config.debug = config.debug || require('system').env.SSH_CLIENT;
+
 	var casper = require('casper').create({
 		timeout: 3600 * 1000,
 		waitTimeout: 60000,
