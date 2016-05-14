@@ -236,7 +236,9 @@ function sell_investments(investments) {
 			}
 		}).then(function (response){
 			this.log(response.statusText, 'info');
-			this.exit();
+			if (!require('system').env.SSH_CLIENT) {
+				this.exit();
+			}
 		})
 		.wait(1500)
 		.then(navigate_investments_page);
