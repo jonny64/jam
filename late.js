@@ -115,20 +115,24 @@ function comment_investments(investment) {
 	}
 
 	var tails = [
-		''
-		, '. Visit Notes Marketplace.'
-		, '. See Notes Marketplace.'
-		, '. See Notes Marketplace. Thank you.'
+		'. Over 5000% yield.'
+		, '. Over 5000% yield. Visit Notes Marketplace.'
+		, '. Over 5000% yield. See Notes Marketplace.'
+		, '. Over 5000% yield. See Notes Marketplace.'
+		, '. Over 5000% yield. Pick up at Notes Marketplace.'
 	];
 
 	var tail = tails[random_integer(0, tails.length)];
 	tail = tail? tail : '';
+	if (random_integer(0, 1) > 0) {
+		tail = tail + ' Thank you.';
+	}
 
 	return {
 		url: "https://btcjam.com/listings/" + investment.id_listing + "/comments",
 		data: {
 			"utf8": "%E2%9C%93",
-			"comment[comment]": "Notes available for this loan. Over 5000% yield" + tail,
+			"comment[comment]": "Notes available for this loan" + tail,
 			"commit": "Create Comment"
 		}
 	};
