@@ -91,12 +91,14 @@ function calc_price_investments(investments) {
 	var default_price = 0.125;
 	var discount = this.config.discount? this.config.discount.defaulted : default_price;
 	discount = discount || default_price;
+	var yld = 100 * (1 / discount - 1);
 
 	for (var i = investments.length - 1; i >= 0; i--) {
 		investments[i].sell_price = investments[i].amount_left * discount;
 		if (investments[i].sell_price > 0.0001) {
 			investments[i].sell_price = parseFloat(investments[i].sell_price.toFixed(4));
 		}
+		investments[i].yld = yld;
 	}
 
 	return investments;
@@ -114,19 +116,42 @@ function comment_investments(investment) {
 		return {};
 	}
 
+
+	var yld = investment.yld;
+
+	if (yld <= 100) {
+		return {};
+	}
+
+	yld = yld > 5000? 5000
+		: yld > 3000? 3000
+		: yld > 2000? 2000
+		: yld > 1000? 1000
+		: yld > 800? 800
+		: yld > 500? 500
+		: yld > 300? 300
+		: yld > 200? 200
+		: yld > 100? 100
+		: ''
+	;
+
 	var tails = [
-		'. Over 5000% yield.'
-		, '. Over 5000% yield. Visit Notes Marketplace.'
-		, '. Over 5000% yield. See Notes Marketplace.'
-		, '. Over 5000% yield. See Notes Marketplace.'
-		, '. Over 5000% yield. Pick up at Notes Marketplace.'
+		''
+		, 'Visit Notes Marketplace.'
+		, 'See Notes Marketplace.'
+		, 'Pick up at Notes Marketplace.'
 	];
 
+	
 	var tail = tails[random_integer(0, tails.length)];
 	tail = tail? tail : '';
+	tail = '. Over ' + yld + '% yield. ' + tail;
+
 	if (random_integer(0, 1) > 0) {
 		tail = tail + ' Thank you.';
 	}
+
+	this.log(tail, 'info');
 
 	return {
 		url: "https://btcjam.com/listings/" + investment.id_listing + "/comments",
@@ -162,7 +187,7 @@ function sell_investments(investments) {
 			return;
 		}
 
-		var comment = comment_investments(investment);
+		var comment = comment_investments.call(this, investment);
 
 		var data = {
 			listing_investment_id: investment.id,
