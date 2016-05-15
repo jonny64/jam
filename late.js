@@ -116,7 +116,6 @@ function comment_investments(investment) {
 		return {};
 	}
 
-
 	var yld = investment.yld;
 
 	if (yld <= 100) {
@@ -151,22 +150,43 @@ function comment_investments(investment) {
 		tail = tail + ' Thank you.';
 	}
 
-	this.log(tail, 'info');
+	var comment = "Notes available for this loan" + tail
+	this.log(comment, 'info');
+
+	var listing_url = "https://btcjam.com/listings/" + investment.id_listing;
 
 	return {
-		url: "https://btcjam.com/listings/" + investment.id_listing + "/comments",
+		listing_url: listing_url,
+		url: listing_url + "/comments",
 		data: {
 			"utf8": "%E2%9C%93",
-			"comment[comment]": "Notes available for this loan" + tail,
+			"comment[comment]": comment,
 			"commit": "Create Comment"
 		}
 	};
+}
+
+function already_exists_comments(comments) {
+	for (var i = comments.length - 1; i >= 0; i--) {
+		if (comments[i].indexOf('Notes available for this loan') > 0) {
+			return true;
+		}
+	}
+	return false;
 }
 
 function random_integer(min, max) {
 	var rand = min - 0.5 + Math.random() * (max - min + 1)
 	rand = Math.round(rand);
 	return rand;
+}
+
+function search_comments() {
+	return this.evaluate(function search_comments_dom() {
+		return [].map.call(__utils__.findAll('#listing_comments-table td .expandable'), function(node) {
+			return node.textContent;
+		});
+	})
 }
 
 function sell_investments(investments) {
@@ -224,24 +244,39 @@ function sell_investments(investments) {
 			if (investment.sell_status == 'OK') {
 				processed_investments.push(investment);
 			}
-		})
-		.wait(11500)
-		.thenOpen(comment.url, {
-			method: 'post',
-			data: comment.data,
-			headers: {
-				'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
-				'Accept': '*/*',
-				'X-Requested-With': 'XMLHttpRequest'
-			}
-		}).then(function (response){
-			this.log(response.statusText, 'info');
-			if (!require('system').env.SSH_CLIENT) {
-				this.exit();
-			}
-		})
-		.wait(1500)
-		.then(navigate_investments_page);
+		});
+
+		if (comment.listing_url) {
+			this.wait(11500)
+			.thenOpen(comment.listing_url, function search_comments_step() {
+				var comments = search_comments.call(this);
+				require('utils').dump(comments);
+				if (already_exists_comments (comments)) {
+					this.log('comment for listing ' + comment.listing_url + ' already exists, skipping...', 'warning')
+					if (!require('system').env.SSH_CLIENT) {
+						this.exit();
+					}
+					this.thenBypass(2);
+				}
+			})
+			.thenOpen(comment.url, {
+				method: 'post',
+				data: comment.data,
+				headers: {
+					'Content-type': 'application/x-www-form-urlencoded; charset=UTF-8',
+					'Accept': '*/*',
+					'X-Requested-With': 'XMLHttpRequest'
+				}
+			}).then(function comment_response_step(response){
+				this.log(response.statusText, 'info');
+				if (!require('system').env.SSH_CLIENT) {
+					this.exit();
+				}
+			})
+			.wait(1500)
+		}
+
+		this.then(navigate_investments_page);
 
 	});
 
