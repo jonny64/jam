@@ -250,7 +250,9 @@ function sell_investments(investments) {
 			this.wait(11500)
 			.thenOpen(comment.listing_url, function search_comments_step() {
 				var comments = search_comments.call(this);
-				require('utils').dump(comments);
+				if (this.config.debug) {
+					require('utils').dump(comments);
+				}
 				if (already_exists_comments (comments)) {
 					this.log('comment for listing ' + comment.listing_url + ' already exists, skipping...', 'warning')
 					if (!require('system').env.SSH_CLIENT) {
