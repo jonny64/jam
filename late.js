@@ -98,6 +98,11 @@ function calc_price_investments(investments) {
 		if (investments[i].sell_price > 0.0001) {
 			investments[i].sell_price = parseFloat(investments[i].sell_price.toFixed(4));
 		}
+
+		if (investments[i].sell_price < 0.000001) {
+			investments[i].sell_price = 0.000001;
+		}
+
 		investments[i].yld = yld;
 	}
 
