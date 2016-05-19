@@ -99,10 +99,10 @@ function pushbullet(options, casper) {
 }
 
 
-function init_casper() {
+function init_casper(config_filename) {
 
 	var fs = require('fs');
-	var config_file = fs.read('btcjam.json');
+	var config_file = fs.read(config_filename || 'btcjam.json');
 	var config = JSON.parse(config_file) || {};
 
 
@@ -120,6 +120,7 @@ function init_casper() {
 	});
 
 	casper.config = config;
+	casper.config.skip = casper.config.skip || {};
 	casper.config.skip.listings = casper.config.skip.listings || [];
 	casper.config.skip.borrowers = casper.config.skip.borrowers || [];
 
