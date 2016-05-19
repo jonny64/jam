@@ -128,7 +128,7 @@ function init_casper() {
 	});
 
 	casper.on("page.error", function(msg, trace) {
-		this.captureSelector('error.png', 'html');
+		// this.captureSelector('error.png', 'html');
 		this.log("Page Error: " + msg, "warning");
 		for(var i=0; i<trace.length; i++) {
 			var step = trace[i];
@@ -137,13 +137,13 @@ function init_casper() {
 	});
 
 	casper.on("error", function(msg, trace) {
-		this.captureSelector('error.png', 'html');
+		// this.captureSelector('error.png', 'html');
 		this.log(msg, "error");
 		// pushbullet ({'body' : '[aws][btcjam] page error'}, this);
 	});
 
 	casper.on("wait.timeout", function(msg, trace) {
-		this.captureSelector('error.png', 'html');
+		// this.captureSelector('error.png', 'html');
 		this.log(msg, "waitTimeout");
 		// pushbullet ({'body' : '[aws][btcjam] page error'}, this);
 	});
@@ -184,12 +184,12 @@ function login(casper, mail, password) {
 
 		casper.waitForSelector('#user_email.email', function fill_login_form() {
 			if (this.config.debug) {
-				this.captureSelector('before_login.png', 'html');
+				// this.captureSelector('before_login.png', 'html');
 			}
 			this.fill('form#new_user', { 'user[email]': mail, 'user[password]': password }, true);
 		});
 	}, function error_popup(){
-		this.captureSelector('error_login.png', 'html');
+		// this.captureSelector('error_login.png', 'html');
 	}, 15000)
 	.waitForText('Dashboard')
 	.then(function balance(){
@@ -198,9 +198,9 @@ function login(casper, mail, password) {
 		casper.log('logged on as ' + mail + '; balance is ' + casper.config.balance + "\n\n", "info");
 	});
 
-	if (casper.config.debug_listings) {
+	if (casper.config.debug) {
 		casper.then(function after_submit(){
-			this.captureSelector('logged_on.png', 'html');
+			// this.captureSelector('logged_on.png', 'html');
 		});
 	}
 }
