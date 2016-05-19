@@ -42,6 +42,11 @@ late:
 late_debug:
 	$(CASPER_SSL) late.js
 
+stat_cron:
+	$(CASPER_SSL) stat.js >> ./stat.log 2>&1
+stat:
+	$(CASPER_SSL) stat.js
+
 loanbase:
 	perl -le 'sleep rand 180' && $(CASPER_LB)loanbase.js > ./loanbase.log 2>&1
 
