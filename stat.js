@@ -111,19 +111,21 @@ function write_stats(investments){
 	var now = new Date();
 	totals.dt = now.toISOString();
 	totals.free = this.config.balance;
+	totals.funding = totals ["Funding in progress"];
+	delete totals ["Funding in progress"];
 
 	append_csv('stat.csv', totals);
 }
 
 function append_csv(filename, totals) {
 		
-	var headers = ["free", "current", "late 1-30 days", "late 31-120 days", "defaulted"];
+	var headers = ["free", "funding", "current", "late 1-30 days", "late 31-120 days", "defaulted"];
 
 	var csv = [];
 	var grand_total = 0;
 	for (var i = 0; i < headers.length; i++) {
 		var total = totals[headers[i]];
-		if(headers[i] == "free" || headers[i] == "current") {
+		if(headers[i] == "free" || headers[i] == "current" || headers[i] == "funding") {
 			grand_total = grand_total + total;
 		}
 		csv.push(total);
@@ -140,6 +142,11 @@ function append_csv(filename, totals) {
 
 	totals.total = grand_total;
 	require('utils').dump(totals);
+
+
+	if (require('system').env.SSH_CLIENT) {
+		return;
+	}
 
 	fs.write(filename, csv + "\n", 'a');
 }
