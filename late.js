@@ -24,7 +24,7 @@ function navigate_investments_page() {
 
 function jam_investments_url (page) {
 	page = page || 1;
-	return 'https://btcjam.com/listing_investments.json?for_user=true&records=100&page=' + page;
+	return 'https://btcjam.com/listing_investments.json?dir=asc&for_user=true&sorting=created_at&records=100&page=' + page;
 }
 
 function jam_datatables_headers() {
