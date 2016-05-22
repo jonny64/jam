@@ -106,6 +106,11 @@ function write_stats(investments){
 
 		var total = totals[state] || 0;
 		totals[state] = total + parseFloat(investments[i].amount_left);
+
+		totals.term_days = totals.term_days || {};
+		totals.term_days[state] = totals.term_days[state] || {};
+		totals.term_days[state][investments[i].listing.term_days] = totals.term_days[state][investments[i].listing.term_days] || 0;
+		totals.term_days[state][investments[i].listing.term_days]++;
 	}
 
 	var now = new Date();
