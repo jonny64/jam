@@ -92,6 +92,12 @@ function write_stats(investments){
 
 	var totals = {};
 
+	var now = new Date();
+	var dt_start = new Date();
+	var dt_end = new Date();
+	dt_start.setMonth(now.getMonth() - 2);
+	dt_end.setMonth(now.getMonth() - 1);
+
 	for (var i = investments.length - 1; i >= 0; i--) {
 
 		var state = investments[i].payment_state;
@@ -105,12 +111,30 @@ function write_stats(investments){
 		}
 
 		var total = totals[state] || 0;
-		totals[state] = total + parseFloat(investments[i].amount_left);
+		var amount_left = parseFloat(investments[i].amount_left);
+		var amount_received = parseFloat(investments[i].amount_received);
+		totals[state] = total + amount_left;
 
 		totals.term_days = totals.term_days || {};
 		totals.term_days[state] = totals.term_days[state] || {};
 		totals.term_days[state][investments[i].listing.term_days] = totals.term_days[state][investments[i].listing.term_days] || 0;
-		totals.term_days[state][investments[i].listing.term_days]++;
+		totals.term_days[state][investments[i].listing.term_days] = totals.term_days[state][investments[i].listing.term_days]
+			+ amount_left;
+
+		var created_at = new Date(investments[i].created_at);
+
+		if (dt_start <= created_at && created_at <= dt_end){
+			totals.last_month = totals.last_month || {late: {cnt: 0, amount: 0}, current: {cnt: 0, amount: 0}};
+			var amount_total = amount_left + amount_received;
+			if (state.indexOf('late') >= 0) {
+				totals.last_month.late.cnt++;
+				totals.last_month.late.amount = totals.last_month.late.amount + amount_total;
+			} else {
+				totals.last_month.current.cnt++;
+				totals.last_month.current.amount = totals.last_month.current.amount + amount_total;
+			}
+// require('utils').dump(investments[i]);
+		}
 	}
 
 	var now = new Date();
