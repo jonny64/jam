@@ -21,14 +21,18 @@ function ids(records) {
 	return ids;
 }
 
-function write_json(add_records, name){
+function write_json(add_records, name, options){
+
+	options = options || {};
 
 	var fs = require('fs');
-
-	var records = load_json(name);
+	var records = options.overwrite? [] : load_json(name);
 
 	var seen = {};
 	for (var i in records) {
+		if (!records[i].id) {
+			continue;
+		}
 		seen[records[i].id] = 1;
 	}
 

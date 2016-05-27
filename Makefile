@@ -42,13 +42,18 @@ late:
 late_debug:
 	$(CASPER_SSL) late.js
 
-stat_cron:
-	$(CASPER_SSL) stat.js >> ./stat.log 2>&1
-stat:
-	$(CASPER_SSL) stat.js
-
 loanbase:
 	perl -le 'sleep rand 180' && $(CASPER_LB)loanbase.js > ./loanbase.log 2>&1
 
 loanbase_debug:
 	$(CASPER_LB)loanbase.js
+
+stat_cron:
+	$(CASPER_SSL) stat.js >> ./stat.log 2>&1
+
+stat:
+	$(CASPER_SSL) stat.js
+
+stat_import: stat
+	mongoimport --db btcjam --collection ins  --jsonArray --upsertFields id --file investments.json
+	mongoimport --db btcjam --collection totals --jsonArray --file totals.json

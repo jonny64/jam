@@ -139,11 +139,15 @@ function write_stats(investments){
 		}
 	}
 
+
 	var now = new Date();
 	totals.dt = now.toISOString();
 	totals.free = this.config.balance;
 	totals.funding = totals ["Funding in progress"];
 	delete totals ["Funding in progress"];
+
+	common.write_json (investments, 'investments', {overwrite: true});
+	common.write_json ([totals], 'totals', {overwrite: true});
 
 	append_csv('stat.csv', totals);
 }
