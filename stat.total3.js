@@ -1,10 +1,12 @@
-// 3 months stats
-var dt_before = (new Date(ISODate().getTime() - 1000 * 60 * 60* 24 * 90)).toJSON();
-print("stat since " + dt_before);
+// -4 .. -1 months stats
+var dt_from = (new Date(ISODate().getTime() - 1000 * 60 * 60* 24 * 30 * 4)).toJSON();
+var dt_to = (new Date(ISODate().getTime() - 1000 * 60 * 60* 24 * 30 * 1)).toJSON();
+print("stat " + dt_from + ' ... ' + dt_to);
 db.ins.aggregate([
 	{$match: {
-		created_at: { // 90 days from now
-			$gt: dt_before
+		created_at: {
+			$gte: dt_from,
+			$lte: dt_to
 		}
 	}},
 	{$group: {
