@@ -17,10 +17,12 @@ db.ins.aggregate([
 			amount: 1,
 			amount_received: 1,
 			amount_left: 1,
+			rate: "$listing.rate_max_rate_per_period"
 		}
 	},
 	{$group: {
 		_id: "$payment_state",
+		rate: {$max: "$rate"},
 		amount_invested: {$sum: "$amount"},
 		amount_received: {$sum: "$amount_received"},
 		"amount_left    ": {$sum: "$amount_left"}
