@@ -9,6 +9,16 @@ db.ins.aggregate([
 			$lte: dt_to
 		}
 	}},
+	{
+		$project: {
+			payment_state: {
+				$substr: [ "$payment_state", 0, 4 ],
+			},
+			amount: 1,
+			amount_received: 1,
+			amount_left: 1,
+		}
+	},
 	{$group: {
 		_id: "$payment_state",
 		amount_invested: {$sum: "$amount"},
