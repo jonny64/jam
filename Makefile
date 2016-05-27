@@ -58,8 +58,11 @@ stat_import: stat
 	mongoimport --db btcjam --collection ins  --jsonArray --upsertFields id --file investments.json
 	mongoimport --db btcjam --collection totals --jsonArray --file totals.json
 
+adjust_floats:
+	mongo btcjam stat.adjust_floats.js
+
 total:
 	mongo btcjam stat.total.js
 
-adjust_floats:
-	mongo btcjam stat.adjust_floats.js
+total3:
+	mongo btcjam stat.total3.js
