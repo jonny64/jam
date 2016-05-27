@@ -70,3 +70,6 @@ total:
 
 total3:
 	mongo btcjam stat.total3.js
+
+slate:
+	mongo btcjam stat.late.js
