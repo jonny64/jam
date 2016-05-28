@@ -61,6 +61,7 @@ stat_import: stat
 stat_import_cron: stat_cron
 	mongoimport --db btcjam --collection ins  --jsonArray --upsertFields id --file investments.json >> ./stat.log 2>&1
 	mongoimport --db btcjam --collection totals --jsonArray --file totals.json >> ./stat.log 2>&1
+	mongo btcjam stat.adjust_floats.js >> ./stat.log 2>&1
 
 adjust_floats:
 	mongo btcjam stat.adjust_floats.js
