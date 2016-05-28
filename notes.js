@@ -234,6 +234,7 @@ function extend_info_notes(all_notes){
 
 				var min_nar = casper.config.skip.yield;
 				note.skip = note.skip || note.nar < (min_nar [note.rating] || min_nar["other"] || 500);
+				note.skip = note.skip || note.term_days > 180;
 				if (note.rating == 'E' || note.rating == 'D') {
 					note.skip = note.skip || note.listing_amount < 10;
 				}
