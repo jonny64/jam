@@ -4,8 +4,8 @@ i +=  $('#alltransactions').dataTable().fnGetData()
 	.reduce(function(prev, s){return prev + s}, 0)
 
 TODO
+ - inv mongoexport csv -> excel -> correlation stat tool, forecast of "payment_state"
  - skip term_days 365
- - inv mongodb analytics
  - auto sell defaulted and then late loans with increased discount (once a week)
  - listing nar to analyze
 
