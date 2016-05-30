@@ -74,3 +74,9 @@ total3:
 
 slate:
 	mongo btcjam stat.late.js
+
+csv:
+	mongoexport --db btcjam --collection ins --type=csv \
+	--fields created_at,payment_state,amount,amount_received,amount_left,\
+	listing.amount,listing.currency_id,listing.credit_score_group.name,listing.term_days \
+	--out ./investments.csv
