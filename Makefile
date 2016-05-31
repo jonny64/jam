@@ -80,3 +80,14 @@ csv:
 	--fields created_at,payment_state,amount,amount_received,amount_left,\
 	listing.amount,listing.currency_id,listing.credit_score_group.name,listing.term_days \
 	--out ./investments.csv
+
+
+flow:
+	$(CASPER_SSL) flow.js
+
+flow_import: flow
+	mongoimport --db btcjam --collection trs  --jsonArray --upsertFields id --file transactions.json
+flow.total:
+	mongo btcjam flow.total.js
+flow.avg:
+	mongo btcjam flow.avg.js
