@@ -163,6 +163,7 @@ function comment_investments(investment) {
 	return {
 		listing_url: listing_url,
 		url: listing_url + "/comments",
+		label: comment,
 		data: {
 			"utf8": "%E2%9C%93",
 			"comment[comment]": comment,
@@ -171,9 +172,9 @@ function comment_investments(investment) {
 	};
 }
 
-function already_exists_comments(comments) {
+function already_exists_comments(comments, label) {
 	for (var i = comments.length - 1; i >= 0; i--) {
-		if (comments[i].indexOf('Notes available for this loan') > 0) {
+		if (comments[i].indexOf(label) > 0) {
 			return true;
 		}
 	}
@@ -258,7 +259,7 @@ function sell_investments(investments) {
 				if (this.config.debug) {
 					require('utils').dump(comments);
 				}
-				if (already_exists_comments (comments)) {
+				if (already_exists_comments (comments, comment.label)) {
 					this.log('comment for listing ' + comment.listing_url + ' already exists, skipping...', 'warning')
 					if (!require('system').env.SSH_CLIENT) {
 						this.exit();
