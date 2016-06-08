@@ -148,14 +148,13 @@ function comment_investments(investment) {
 
 	
 	var tail = tails[random_integer(0, tails.length)];
-	tail = tail? tail : '';
-	tail = '. Over ' + yld + '% yield. ' + tail;
+	var yield_label = "Notes available for this loan. Over " + yld + '% yield. ';
 
 	if (random_integer(0, 1) > 0) {
 		tail = tail + ' Thank you.';
 	}
 
-	var comment = "Notes available for this loan" + tail
+	var comment = yield_label + tail;
 	this.log(comment, 'info');
 
 	var listing_url = "https://btcjam.com/listings/" + investment.id_listing;
@@ -163,7 +162,7 @@ function comment_investments(investment) {
 	return {
 		listing_url: listing_url,
 		url: listing_url + "/comments",
-		label: comment,
+		label: yield_label,
 		data: {
 			"utf8": "%E2%9C%93",
 			"comment[comment]": comment,
