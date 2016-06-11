@@ -13,7 +13,7 @@ casper.then(navigate_transactions_page).then(function(){
 }).then(function(){
 	loop_page.call(this, 1, 50, 'Deposit');
 }).then(function(){
-	loop_page.call(this, 1, 5, 'Payment Received');
+//	loop_page.call(this, 1, 5, 'Payment Received');
 });
 
 
