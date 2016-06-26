@@ -405,8 +405,8 @@ function amount_listings (casper, listings) {
 	var total_shares = 0.0;
 	for (var i in listings) {
 
-		var expected_return = parseFloat(listings [i].expected_return);
-		listings[i].shares = expected_return <= 0? 0 : expected_return;
+		listings[i].expected_return = parseFloat(listings [i].expected_return);
+		listings[i].shares = listings[i].expected_return <= 0? 0 : listings[i].expected_return;
 		total_shares = total_shares + listings[i].shares;
 	}
 
@@ -417,19 +417,7 @@ function amount_listings (casper, listings) {
 	for (var i in listings) {
 		var listing = listings [i];
 
-		if (listing.amount_invest >= 0) {
-			console.log('listing ' + listing.id + ' amount ' + listing.amount_invest);
-			invest_listings.push(listing);
-			continue;
-		}
-
 		listing.amount_invest = balance * listing.shares / total_shares;
-
-		if (listing.amount_invest <= 0) {
-			listing.amount_invest = 0;
-			console.log('listing ' + listing.id + ' amount ' + listing.amount_invest);
-			continue;
-		}
 
 		var max_invest = casper.config.max_invest;
 
@@ -437,7 +425,13 @@ function amount_listings (casper, listings) {
 			listing.amount_invest = max_invest;
 		}
 
-		console.log('listing ' + listing.id + ' amount ' + listing.amount_invest);
+		if (listing.amount_invest <= 0) {
+			listing.amount_invest = 0;
+			console.log('listing ' + listing.id + ' amount ' + listing.amount_invest + '; er = ' + listing.expected_return);
+			continue;
+		}
+
+		console.log('listing ' + listing.id + ' amount ' + listing.amount_invest + '; er = ' + listing.expected_return);
 
 		invest_listings.push(listing);
 	}
