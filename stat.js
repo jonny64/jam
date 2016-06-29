@@ -159,7 +159,7 @@ function append_csv(filename, totals) {
 	var csv = [];
 	var grand_total = 0;
 	for (var i = 0; i < headers.length; i++) {
-		var total = totals[headers[i]];
+		var total = totals[headers[i]] || 0;
 		if(headers[i] == "free" || headers[i] == "current" || headers[i] == "funding") {
 			grand_total = grand_total + total;
 		}
