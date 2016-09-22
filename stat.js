@@ -163,10 +163,10 @@ function append_csv(filename, totals) {
 		if(headers[i] == "free" || headers[i] == "current" || headers[i] == "funding") {
 			grand_total = grand_total + total;
 		}
-		csv.push(total);
+		csv.push(total.toFixed(2));
 	}
 
-	csv.unshift(totals["dt"], totals["btc_to_usd_rate"], grand_total);
+	csv.unshift(totals["dt"], totals["btc_to_usd_rate"], grand_total.toFixed(2));
 	csv = csv.join(',');
 	var fs = require('fs');
 
