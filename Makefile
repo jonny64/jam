@@ -3,21 +3,21 @@
 
 
 NAME=fprieur/docker-casperjs
-VERSION=
-CASPER=docker run --rm -a stdout -w /mnt/test/ -v `pwd`:/mnt/test $(NAME):$(VERSION) /usr/bin/casperjs \
+VERSION=latest
+CASPER=docker run --rm --attach stdout --workdir /mnt/test/ --volume `pwd`:/mnt/test $(NAME):$(VERSION) /usr/bin/casperjs \
 	/mnt/test/$(filter-out $@,$(MAKECMDGOALS))
 
 CASPER_LB=docker run --rm -a stdout -w /mnt/test/ -v `pwd`:/mnt/test $(NAME):$(VERSION) /usr/bin/casperjs \
 	--ssl-protocol=any \
         /mnt/test/$(filter-out $@,$(MAKECMDGOALS))
 
-CASPER_SSL=/usr/local/bin/casperjs --ssl-protocol=any
+CASPER_SSL=/usr/bin/casperjs --ssl-protocol=any
 
 version:
 	$(CASPER) --version
 
 selftest:
-	docker run --rm $(NAME):$(VERSION) /usr/bin/casperjs selftest
+	$(CASPER_SSL) selftest
 
 notes:
 	$(CASPER_SSL) notes.js >> ./notes.log 2>&1
