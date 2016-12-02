@@ -406,7 +406,8 @@ function amount_listings (casper, listings) {
 	for (var i in listings) {
 
 		listings[i].expected_return = parseFloat(listings [i].expected_return);
-		listings[i].shares = listings[i].expected_return <= 0? 0 : listings[i].expected_return;
+		listings[i].shares = listings[i].expected_return <= 0 || listings[i].expected_listing_loss > 0.17? 0
+			: listings[i].expected_return;
 		total_shares = total_shares + listings[i].shares;
 	}
 

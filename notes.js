@@ -141,7 +141,7 @@ function api_buy_notes(notes, casper) {
 		var note = notes [i++];
 
 		note.skip = note.skip
-			|| (note.rating == 'E' || note.rating == 'D') && note.listing_amount < 10
+			|| (note.rating == 'E' || note.rating == 'D') && note.listing_amount < 3
 			|| !note.term_days
 		;
 
@@ -234,9 +234,9 @@ function extend_info_notes(all_notes){
 
 				var min_nar = casper.config.skip.yield;
 				note.skip = note.skip || note.nar < (min_nar [note.rating] || min_nar["other"] || 500);
-				note.skip = note.skip || note.term_days > 180;
+				note.skip = note.skip || note.term_days > 270;
 				if (note.rating == 'E' || note.rating == 'D') {
-					note.skip = note.skip || note.listing_amount < 10;
+					note.skip = note.skip || note.listing_amount < 3;
 				}
 				if (!note.skip || casper.config.debug_notes) {
 					require('utils').dump(note);
