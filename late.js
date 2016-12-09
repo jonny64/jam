@@ -150,11 +150,11 @@ function comment_investments(investment) {
 	var tail = tails[random_integer(0, tails.length)];
 	var yield_label = "Notes available for this loan. Over " + yld + '% yield. ';
 
-	if (random_integer(0, 1) > 0) {
+	if (random_integer(0, 1) > 0 && tail) {
 		tail = tail + ' Thank you.';
 	}
 
-	var comment = yield_label + tail;
+	var comment = yield_label + (tail? tail : '');
 	this.log(comment, 'info');
 
 	var listing_url = "https://btcjam.com/listings/" + investment.id_listing;
