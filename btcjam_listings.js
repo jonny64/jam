@@ -151,7 +151,7 @@ casper.viewport(1980, 1080);
 function jam_listings_url () {
 	// ,180-365-days
 	return "https://btcjam.com/listings/f/"
-		+ "30-60-days,90-120-days/usd-tied,btc-tied,eur-tied/a,b,c/safe/no-hide/ns/no";
+		+ "30-60-days,90-120-days,180-365-days/btc-tied/a,b,c/safe/no-hide/ns/no";
 }
 
 function jam_datatables_headers() {
